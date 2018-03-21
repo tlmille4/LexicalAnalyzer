@@ -1,1 +1,1 @@
-integer abc;
+START_MAIN IF 5 < 4

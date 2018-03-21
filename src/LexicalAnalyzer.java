@@ -26,6 +26,8 @@ public class LexicalAnalyzer
     final int LEFT_PAREN = 25;
     final int RIGHT_PAREN = 26;
 
+    final int SPACE = 4;
+
     final int START_MAIN = 30;
 
     final int END_MAIN = 31;
@@ -41,7 +43,15 @@ public class LexicalAnalyzer
     final int SEPERATOR = 38;
     final int LOOP = 39;
     final int END_FOR = 40;
+    final int WHILE = 41;
+    final int END_WHILE = 42;
+    final int LINE_COMMENT = 43;
+    final int MULTI_LINE_COMMENT = 44;
 
+    final int EQUAL_RELATION = 50;
+    final int OR_RELATION = 51;
+    final int LESS_RELATION = 52;
+    final int GREATER_RELATION = 53;
 
 
 
@@ -95,16 +105,54 @@ and return the token */
                 addChar();
                 nextToken = DIV_OP;
                 break;
-//            case '_':
-//                addChar();
-//                nextToken = UNDERSCORE;
-//                break;
+            case '=':
+                while (charClass == UNKNOWN) {
+                    addChar();
+                    getChar(fis);
+                }
+                System.out.println("Lex Len: " + lexLen);
+                if(lexLen == 2) {
+                    nextToken = EQUAL_RELATION;
+                    break;
+                }
+                else {
+                    nextToken = ASSIGN_OP;
+                    break;
+                }
+            case '<':
+                addChar();
+                nextToken = LESS_RELATION;
+                break;
+            case '>':
+                addChar();
+                nextToken = GREATER_RELATION;
+                break;
+            case '|':
+                checkRelation();
+                if(lexLen == 2) {
+                    nextToken = OR_RELATION;
+                    break;
+                }
+                else {
+                    nextToken = -1;
+                    break;
+                }
             default:
                 addChar();
                 nextToken = -1;
                 break;
         }
         return nextToken;
+    }
+
+
+    void checkRelation()
+    {
+        while (charClass == UNKNOWN) {
+            addChar();
+            getChar(fis);
+        }
+        System.out.println(lexLen);
     }
 
     /*****************************************************/
@@ -114,7 +162,7 @@ and return the token */
         if (lexLen <= 98)
         {
             lexeme[lexLen++] = nextChar;
-            lexeme[lexLen] = 0;
+            //lexeme[lexLen] = 0;
         } else
             System.out.println("Error - lexeme is too long");
     }
@@ -141,6 +189,7 @@ and return the token */
                 result = true;
                 break;
             case "END_MAIN":
+                nextToken = END_MAIN;
                 break;
             case "integer":
                 break;
@@ -153,6 +202,22 @@ and return the token */
             case "character":
                 break;
             case "console":
+                break;
+            case "IF":
+                nextToken = IF;
+                result = true;
+                break;
+            case "END_IF":
+                nextToken = END_IF;
+                result = true;
+                break;
+            case "THEN":
+                nextToken = THEN;
+                result = true;
+                break;
+            case "WHILE":
+                nextToken = WHILE;
+                result = true;
                 break;
 
         }
@@ -174,19 +239,24 @@ input and determine its character class */
             e.printStackTrace();
         }
 
-        if (Character.isDefined(nextChar))
+        if(Character.isSpaceChar(nextChar))
+            charClass = SPACE;
+        else
         {
-            //System.out.println(nextChar);
-            if (Character.isAlphabetic(nextChar))
-                charClass = LETTER;
-            else if (Character.isDigit(nextChar))
-                charClass = DIGIT;
-            else if (nextChar == '_') charClass = UNDERSCORE;
-            else charClass = UNKNOWN;
-        }
-        else {
-            charClass = -1;
-            //System.out.println(nextChar);
+            if (Character.isDefined(nextChar))
+            {
+                //System.out.println(nextChar);
+                if (Character.isAlphabetic(nextChar))
+                    charClass = LETTER;
+                else if (Character.isDigit(nextChar))
+                    charClass = DIGIT;
+                else if (nextChar == '_') charClass = UNDERSCORE;
+                else charClass = UNKNOWN;
+            }
+            else
+            {
+                charClass = -1;
+            }
         }
  }
 
@@ -221,8 +291,8 @@ returns a non-whitespace character */
                 }
                 if(!checkCommand())
                     nextToken = IDENT;
-                else
-                    nextToken = START_MAIN;
+                //else
+                    //nextToken = START_MAIN;
                 break;
             /* Parse integer literals */
             case DIGIT:
