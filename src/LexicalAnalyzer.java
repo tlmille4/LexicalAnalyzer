@@ -46,12 +46,15 @@ public class LexicalAnalyzer
     final int WHILE = 41;
     final int END_WHILE = 42;
     final int LINE_COMMENT = 43;
-    final int MULTI_LINE_COMMENT = 44;
+    final int MULTI_LINE_COMMENT_BEGIN = 44;
+    final int MULTI_LINE_COMMENT_END = 45;
 
     final int EQUAL_RELATION = 50;
     final int OR_RELATION = 51;
     final int LESS_RELATION = 52;
     final int GREATER_RELATION = 53;
+    final int TRUE = 54;
+    final int FALSE = 55;
 
 
 
@@ -65,6 +68,9 @@ public class LexicalAnalyzer
     int token;
     int nextToken;
     int currentCount = 0;
+
+    boolean checkCurrentChar = false;
+    char bufferChar;
 
     String[] commandArray;
 
@@ -98,8 +104,22 @@ and return the token */
                 nextToken = SUB_OP;
                 break;
             case '*':
-                addChar();
-                nextToken = MULT_OP;
+                checkRelation();
+                if(lexLen == 1)
+                    nextToken = MULT_OP;
+                else {
+                    if(lexLen == 2 && lexeme[lexLen-1] == '#')
+                        nextToken = MULTI_LINE_COMMENT_END;
+                }
+                break;
+            case '#':
+                checkRelation();
+                if(lexLen == 1)
+                    nextToken = LINE_COMMENT;
+                else {
+                    if(lexLen == 2 && lexeme[lexLen-1] == '*')
+                        nextToken = MULTI_LINE_COMMENT_BEGIN;
+                }
                 break;
             case '/':
                 addChar();
@@ -152,6 +172,8 @@ and return the token */
             addChar();
             getChar(fis);
         }
+        checkCurrentChar = true;
+        bufferChar = nextChar;
         System.out.println(lexLen);
     }
 
@@ -219,6 +241,14 @@ and return the token */
                 nextToken = WHILE;
                 result = true;
                 break;
+            case "true":
+                nextToken = TRUE;
+                result = true;
+                break;
+            case "false":
+                nextToken = FALSE;
+                result = true;
+                break;
 
         }
 
@@ -230,14 +260,19 @@ and return the token */
 input and determine its character class */
     void getChar(FileInputStream inputFile)
     {
-
-        //HAVE FUNCTION GETCOMMAND IF NOT, THEN DO GET CHAR
-        //char currentChar = inCharArr[currentCount];
-        try {
-            nextChar = (char) inputFile.read();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(checkCurrentChar == true)
+        {
+            checkCurrentChar = false;
+            nextChar = bufferChar;
         }
+        else {
+            try {
+                nextChar = (char) inputFile.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         if(Character.isSpaceChar(nextChar))
             charClass = SPACE;
@@ -320,13 +355,15 @@ returns a non-whitespace character */
                 break;
         } /* End of switch */
 
-
         System.out.print("Next token is: "+ nextToken +", Next lexeme is ");
+
         for(char a : lexeme) {
             System.out.print(a);
         }
+
         System.out.println();
         Arrays.fill(lexeme, ' ');
+
         return nextToken;
     } /* End of function lex */
 }

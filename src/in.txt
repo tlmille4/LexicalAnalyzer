@@ -1,1 +1,1 @@
-START_MAIN IF 5 < 4
+START_MAIN IF 5 < 4#*asdf*#
