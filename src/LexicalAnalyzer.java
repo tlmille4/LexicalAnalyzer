@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class LexicalAnalyzer
@@ -12,9 +13,12 @@ public class LexicalAnalyzer
     }
 
     //Declaring Literals
+    final int DECIMAL = -2;
     final int LETTER = 0;
+    final int CONSTANT_DECLARATION = 3;
     final int DIGIT = 1;
     final int UNKNOWN = 99;
+    final int FLOAT_LIT = 9;
     final int INT_LIT = 10;
     final int IDENT = 11;
     final int UNDERSCORE = 12;
@@ -56,6 +60,12 @@ public class LexicalAnalyzer
     final int TRUE = 54;
     final int FALSE = 55;
 
+    final int INTEGER_DECLARATION = 60;
+    final int FLOAT_DECLARATION = 61;
+    final int STRING_DECLARATION = 62;
+    final int BOOLEAN_DECLARATION = 63;
+    final int CHARACTER_DECLARATION = 64;
+
 
 
 
@@ -63,6 +73,10 @@ public class LexicalAnalyzer
     FileInputStream fis;
     int charClass;
     char lexeme[] = new char[100];
+    ArrayList<Character> lexemeList = new ArrayList<Character>();
+
+    int decimalCount = 0;
+
     char nextChar;
     int lexLen;
     int token;
@@ -70,6 +84,7 @@ public class LexicalAnalyzer
     int currentCount = 0;
 
     boolean checkCurrentChar = false;
+    boolean isValid = true;
     char bufferChar;
 
     String[] commandArray;
@@ -108,6 +123,8 @@ and return the token */
                 if(lexLen == 1)
                     nextToken = MULT_OP;
                 else {
+                    for(char c : lexeme)
+                        System.out.print(c);
                     if(lexLen == 2 && lexeme[lexLen-1] == '#')
                         nextToken = MULTI_LINE_COMMENT_END;
                 }
@@ -159,6 +176,7 @@ and return the token */
                 }
             default:
                 addChar();
+                System.out.println(ch + " DONT EXIST");
                 nextToken = -1;
                 break;
         }
@@ -168,7 +186,7 @@ and return the token */
 
     void checkRelation()
     {
-        while (charClass == UNKNOWN) {
+        while (charClass == UNKNOWN && !Character.isWhitespace(nextChar)) {
             addChar();
             getChar(fis);
         }
@@ -183,6 +201,7 @@ and return the token */
     {
         if (lexLen <= 98)
         {
+            lexemeList.add(nextChar);
             lexeme[lexLen++] = nextChar;
             //lexeme[lexLen] = 0;
         } else
@@ -200,6 +219,13 @@ and return the token */
             command += letter;
         }
 
+        for(Character letter : lexemeList)
+        {
+            System.out.print(letter);
+        }
+        System.out.println();
+
+
         command = command.trim();
         System.out.println(command);
         boolean result = false;
@@ -212,16 +238,31 @@ and return the token */
                 break;
             case "END_MAIN":
                 nextToken = END_MAIN;
+                result = true;
+                break;
+            case "CONSTANT":
+                nextToken = CONSTANT_DECLARATION;
+                result = true;
                 break;
             case "integer":
+                nextToken = INTEGER_DECLARATION;
+                result = true;
                 break;
             case "string":
+                nextToken = STRING_DECLARATION;
+                result = true;
                 break;
             case "float":
+                nextToken = FLOAT_DECLARATION;
+                result = true;
                 break;
             case "boolean":
+                nextToken = BOOLEAN_DECLARATION;
+                result = true;
                 break;
             case "character":
+                nextToken = CHARACTER_DECLARATION;
+                result = true;
                 break;
             case "console":
                 break;
@@ -265,33 +306,39 @@ input and determine its character class */
             checkCurrentChar = false;
             nextChar = bufferChar;
         }
-        else {
+        else
+        {
             try {
                 nextChar = (char) inputFile.read();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println(e);
             }
         }
 
 
-        if(Character.isSpaceChar(nextChar))
+        if(Character.isSpaceChar(nextChar)) {
             charClass = SPACE;
+        }
         else
         {
-            if (Character.isDefined(nextChar))
-            {
+            //if (Character.isDefined(nextChar))
+            //{
                 //System.out.println(nextChar);
-                if (Character.isAlphabetic(nextChar))
+            if(nextChar == '.') {
+                decimalCount++;
+                charClass = DECIMAL;
+            }
+            else if (Character.isAlphabetic(nextChar))
                     charClass = LETTER;
                 else if (Character.isDigit(nextChar))
                     charClass = DIGIT;
                 else if (nextChar == '_') charClass = UNDERSCORE;
                 else charClass = UNKNOWN;
-            }
-            else
-            {
-                charClass = -1;
-            }
+            //}
+            //else
+            //{
+             //   charClass = -1;
+            //}
         }
  }
 
@@ -302,7 +349,7 @@ input and determine its character class */
 returns a non-whitespace character */
     void getNonBlank()
     {
-        while(Character.isSpaceChar(nextChar))
+        while(Character.isSpaceChar(nextChar) || Character.isWhitespace(nextChar))
             getChar(fis);
     }
 
@@ -333,12 +380,19 @@ returns a non-whitespace character */
             case DIGIT:
                 addChar();
                 getChar(fis);
-                while (charClass == DIGIT)
+                while (charClass == DIGIT || charClass == DECIMAL)
                 {
                     addChar();
                     getChar(fis);
+                    //checkCurrentChar = true;
                 }
-                nextToken = INT_LIT;
+                //bufferChar = nextChar;
+                if(decimalCount == 1)
+                    nextToken = FLOAT_LIT;
+                else if(decimalCount == 0)
+                    nextToken = INT_LIT;
+                else
+                    isValid = false;
                 break;
             /* Parentheses and operators */
             case UNKNOWN:
@@ -352,18 +406,60 @@ returns a non-whitespace character */
                 lexeme[1] = 'O';
                 lexeme[2] = 'F';
                 lexeme[3] = 0;
+                lexemeList.add('E');
+                lexemeList.add('O');
+                lexemeList.add('F');
+                lexemeList.add('0');
+
+                break;
+            case SPACE:
+                System.out.println("Test");
                 break;
         } /* End of switch */
 
-        System.out.print("Next token is: "+ nextToken +", Next lexeme is ");
+        printResult();
+        clearLexemeArray();
 
-        for(char a : lexeme) {
-            System.out.print(a);
-        }
-
-        System.out.println();
-        Arrays.fill(lexeme, ' ');
 
         return nextToken;
     } /* End of function lex */
+
+    void clearLexemeArray()
+    {
+        Arrays.fill(lexeme, ' ');
+        lexemeList.clear();
+        decimalCount = 0;
+    }
+
+    void printResult()
+    {
+        String strLexeme = "";
+        for (Character a : lexemeList) {
+            strLexeme += a;
+        }
+
+        if(isValid)
+        {
+            System.out.println("Next token is: " + nextToken + ", Next lexeme is " + strLexeme);
+
+//            for (char a : lexeme) {
+//                System.out.print(a);
+//            }
+//
+//            System.out.println();
+//
+//
+//            for (Character a : lexemeList) {
+//                System.out.print(a);
+//            }
+//            System.out.println();
+        }
+        else
+        {
+            isValid = true;
+            System.out.println("[!] Error -- Invalid Lexeme: " + strLexeme);
+        }
+
+
+    }
 }

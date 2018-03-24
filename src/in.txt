@@ -1,1 +1,6 @@
-START_MAIN IF 5 < 4#*asdf*#
+START_MAIN IF 5.2. < 4#*asdf*#
+START_MAIN END_MAIN 5
+START_MAIN 5 54
+poop
+5
+character
