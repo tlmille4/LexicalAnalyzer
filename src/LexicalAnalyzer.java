@@ -29,6 +29,7 @@ public class LexicalAnalyzer
     final int DIV_OP = 24;
     final int LEFT_PAREN = 25;
     final int RIGHT_PAREN = 26;
+    final int STRING_LITERAL = 27;
 
     final int SPACE = 4;
 
@@ -66,11 +67,16 @@ public class LexicalAnalyzer
     final int BOOLEAN_DECLARATION = 63;
     final int CHARACTER_DECLARATION = 64;
 
+    final int LENGTH_FUNCTION = 100;
+    final int TOUPPER_FUNCTION = 101;
+    final int TOLOWER_FUNCTION = 102;
+
 
 
 
     //Global variables used for parsing and storing
     FileInputStream fis;
+    int lineNumber = 1;
     int charClass;
     char lexeme[] = new char[100];
     ArrayList<Character> lexemeList = new ArrayList<Character>();
@@ -79,18 +85,17 @@ public class LexicalAnalyzer
 
     char nextChar;
     int lexLen;
-    int token;
+    int functionLexeme;
     int nextToken;
     int currentCount = 0;
 
+    boolean isValidFunction = false;
     boolean checkCurrentChar = false;
     boolean isValid = true;
     char bufferChar;
+    String functionCommand = "";
 
-    String[] commandArray;
 
-    String line = "";
-    String currentCommand = "";
 
     /*****************************************************/
 
@@ -315,30 +320,23 @@ input and determine its character class */
             }
         }
 
-
-        if(Character.isSpaceChar(nextChar)) {
-            charClass = SPACE;
-        }
+        if(nextChar == '"')
+            charClass = STRING_LITERAL;
         else
         {
-            //if (Character.isDefined(nextChar))
-            //{
-                //System.out.println(nextChar);
-            if(nextChar == '.') {
+            if(nextChar == '.')
+            {
                 decimalCount++;
                 charClass = DECIMAL;
             }
-            else if (Character.isAlphabetic(nextChar))
+            else if(Character.isAlphabetic(nextChar))
                     charClass = LETTER;
-                else if (Character.isDigit(nextChar))
-                    charClass = DIGIT;
-                else if (nextChar == '_') charClass = UNDERSCORE;
-                else charClass = UNKNOWN;
-            //}
-            //else
-            //{
-             //   charClass = -1;
-            //}
+            else if (Character.isDigit(nextChar))
+                charClass = DIGIT;
+            else if (nextChar == '_')
+                charClass = UNDERSCORE;
+            else
+                charClass = UNKNOWN;
         }
  }
 
@@ -349,8 +347,11 @@ input and determine its character class */
 returns a non-whitespace character */
     void getNonBlank()
     {
-        while(Character.isSpaceChar(nextChar) || Character.isWhitespace(nextChar))
+        while(Character.isSpaceChar(nextChar) || Character.isWhitespace(nextChar)) {
             getChar(fis);
+            if(nextChar == '\n')
+                lineNumber++;
+        }
     }
 
     /*****************************************************/
@@ -365,16 +366,39 @@ returns a non-whitespace character */
         {
             /* Parse identifiers */
             case LETTER:
+                //Adding character to lexeme array and getting next character
                 addChar();
                 getChar(fis);
+                //Getting the rest of the word
                 while (charClass == LETTER || charClass == DIGIT || charClass == UNDERSCORE) {
                     addChar();
                     getChar(fis);
                 }
+                //Checking if identifier with function appended
+                //getChar(fis);
                 if(!checkCommand())
                     nextToken = IDENT;
-                //else
-                    //nextToken = START_MAIN;
+
+                if(charClass == DECIMAL && decimalCount == 1)
+                {
+                    getChar(fis);
+
+                    while (charClass == LETTER) {
+                        functionCommand += nextChar;
+                        getChar(fis);
+                    }
+
+
+                    functionOperation(functionCommand);
+
+                    if(isValidFunction)
+                        System.out.print("Function Token = " + functionLexeme + ", Next Lexeme " + functionCommand + " on ");
+                    else
+                        System.out.println("[!] Error. Invalid Function Name: " + functionCommand);
+                }
+                else if (decimalCount > 1)
+                    isValid = false;
+
                 break;
             /* Parse integer literals */
             case DIGIT:
@@ -415,6 +439,30 @@ returns a non-whitespace character */
             case SPACE:
                 System.out.println("Test");
                 break;
+            case STRING_LITERAL:
+                System.out.println("Fuck");
+//                addChar();
+//                getChar(fis);
+//                while(charClass != STRING_LITERAL && lexLen < 95)
+//                {
+//                    addChar();
+//                    getChar(fis);
+//                }
+                do
+                {
+                    addChar();
+                    getChar(fis);
+                }
+                while(charClass != STRING_LITERAL);
+                //Getting last " from file
+                addChar();
+                getChar(fis);
+
+                nextToken = STRING_LITERAL;
+                break;
+            default:
+                System.out.println("[!] Error at character '" + nextChar + "' on line: " + lineNumber);
+                nextToken = -1;
         } /* End of switch */
 
         printResult();
@@ -423,6 +471,25 @@ returns a non-whitespace character */
 
         return nextToken;
     } /* End of function lex */
+
+    void functionOperation(String function)
+    {
+        switch(function)
+        {
+            case "length":
+                functionLexeme = LENGTH_FUNCTION;
+                isValidFunction = true;
+                break;
+            case "toUpperCase":
+                functionLexeme = TOUPPER_FUNCTION;
+                isValidFunction = true;
+                break;
+            case "toLowerCase":
+                functionLexeme = TOLOWER_FUNCTION;
+                isValidFunction = true;
+                break;
+        }
+    }
 
     void clearLexemeArray()
     {
