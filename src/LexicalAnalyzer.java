@@ -31,6 +31,7 @@ public class LexicalAnalyzer
     final int RIGHT_PAREN = 26;
     final int STRING_LITERAL = 27;
 
+    final int SEMICOLON = 28;
     final int SPACE = 4;
 
     final int START_MAIN = 30;
@@ -58,6 +59,10 @@ public class LexicalAnalyzer
     final int OR_RELATION = 51;
     final int LESS_RELATION = 52;
     final int GREATER_RELATION = 53;
+
+    final int LESS_EQUAL_RELATION = 54;
+    final int GREATER_EQUAL_RELATION = 55;
+
     final int TRUE = 54;
     final int FALSE = 55;
 
@@ -70,6 +75,12 @@ public class LexicalAnalyzer
     final int LENGTH_FUNCTION = 100;
     final int TOUPPER_FUNCTION = 101;
     final int TOLOWER_FUNCTION = 102;
+    final int CONSOLE_FUNCTION = 103;
+    final int FUNCTION_DECLARATION = 104;
+    final int COMMA_SEPARATOR = 105;
+    final int RETURNS_FUNCTION_COMMAND = 106;
+    final int VOID_IDENTIFIER_TYPE = 107;
+    final int FUNCTION_END_STATEMENT = 108;
 
 
 
@@ -89,6 +100,7 @@ public class LexicalAnalyzer
     int nextToken;
     int currentCount = 0;
 
+    boolean endOfFile = false;
     boolean isValidFunction = false;
     boolean checkCurrentChar = false;
     boolean isValid = true;
@@ -147,12 +159,17 @@ and return the token */
                 addChar();
                 nextToken = DIV_OP;
                 break;
+            case ',':
+                addChar();
+                nextToken = COMMA_SEPARATOR;
+                break;
             case '=':
-                while (charClass == UNKNOWN) {
-                    addChar();
-                    getChar(fis);
-                }
-                System.out.println("Lex Len: " + lexLen);
+                checkRelation();
+                //while (charClass == UNKNOWN) {
+                 //   addChar();
+                 //   getChar(fis);
+               // }
+                //System.out.println("Lex Len: " + lexLen);
                 if(lexLen == 2) {
                     nextToken = EQUAL_RELATION;
                     break;
@@ -162,13 +179,26 @@ and return the token */
                     break;
                 }
             case '<':
-                addChar();
-                nextToken = LESS_RELATION;
-                break;
+                checkRelation();
+                if(lexLen == 2) {
+                    nextToken = LESS_EQUAL_RELATION;
+                    break;
+                }
+                else
+                {
+                    nextToken = LESS_RELATION;
+                    break;
+                }
             case '>':
-                addChar();
-                nextToken = GREATER_RELATION;
-                break;
+                checkRelation();
+                if(lexLen == 2) {
+                    nextToken = GREATER_EQUAL_RELATION;
+                    break;
+                }
+                else {
+                    nextToken = GREATER_RELATION;
+                    break;
+                }
             case '|':
                 checkRelation();
                 if(lexLen == 2) {
@@ -176,12 +206,18 @@ and return the token */
                     break;
                 }
                 else {
+                    //System.out.println("Error on Line " + lineNumber + "!");
                     nextToken = -1;
+                    isValid = false;
                     break;
                 }
-            default:
+            case ';':
                 addChar();
-                System.out.println(ch + " DONT EXIST");
+                nextToken = SEMICOLON;
+                break;
+            default:
+                //addChar();
+                //isValid = false;
                 nextToken = -1;
                 break;
         }
@@ -220,19 +256,19 @@ and return the token */
     {
         String command = "";
 
-        for(char letter : lexeme) {
+        for(char letter : lexemeList) {
             command += letter;
         }
 
-        for(Character letter : lexemeList)
-        {
-            System.out.print(letter);
-        }
-        System.out.println();
+//        for(Character letter : lexemeList)
+//        {
+//            System.out.print(letter);
+//        }
+//        System.out.println();
 
 
         command = command.trim();
-        System.out.println(command);
+        //System.out.println(command);
         boolean result = false;
 
         switch(command)
@@ -270,6 +306,8 @@ and return the token */
                 result = true;
                 break;
             case "console":
+                nextToken = CONSOLE_FUNCTION;
+                result = true;
                 break;
             case "IF":
                 nextToken = IF;
@@ -287,12 +325,32 @@ and return the token */
                 nextToken = WHILE;
                 result = true;
                 break;
+            case "FUNCTION":
+                nextToken = FUNCTION_DECLARATION;
+                result = true;
+                break;
+            case "RETURNS":
+                nextToken = RETURNS_FUNCTION_COMMAND;
+                result = true;
+                break;
+            case "RETURN":
+                nextToken = RETURNS_FUNCTION_COMMAND;
+                result = true;
+                break;
             case "true":
                 nextToken = TRUE;
                 result = true;
                 break;
             case "false":
                 nextToken = FALSE;
+                result = true;
+                break;
+            case "void":
+                nextToken = VOID_IDENTIFIER_TYPE;
+                result = true;
+                break;
+            case "END_FUNCTION":
+                nextToken = FUNCTION_END_STATEMENT;
                 result = true;
                 break;
 
@@ -375,7 +433,7 @@ returns a non-whitespace character */
                     getChar(fis);
                 }
                 //Checking if identifier with function appended
-                //getChar(fis);
+
                 if(!checkCommand())
                     nextToken = IDENT;
 
@@ -392,9 +450,11 @@ returns a non-whitespace character */
                     functionOperation(functionCommand);
 
                     if(isValidFunction)
-                        System.out.print("Function Token = " + functionLexeme + ", Next Lexeme " + functionCommand + " on ");
-                    else
+                        System.out.print("Function Token = " + functionLexeme + ", Function Lexeme " + functionCommand + " on ");
+                    else {
                         System.out.println("[!] Error. Invalid Function Name: " + functionCommand);
+                        isValid = false;
+                    }
                 }
                 else if (decimalCount > 1)
                     isValid = false;
@@ -422,32 +482,18 @@ returns a non-whitespace character */
             case UNKNOWN:
                 lookup(nextChar);
                 getChar(fis);
+                if(nextToken == -1)
+                    endOfFile = true;
                 break;
             /* null */
             case -1:
                 nextToken = -1;
-                lexeme[0] = 'E';
-                lexeme[1] = 'O';
-                lexeme[2] = 'F';
-                lexeme[3] = 0;
                 lexemeList.add('E');
                 lexemeList.add('O');
                 lexemeList.add('F');
                 lexemeList.add('0');
-
-                break;
-            case SPACE:
-                System.out.println("Test");
                 break;
             case STRING_LITERAL:
-                System.out.println("Fuck");
-//                addChar();
-//                getChar(fis);
-//                while(charClass != STRING_LITERAL && lexLen < 95)
-//                {
-//                    addChar();
-//                    getChar(fis);
-//                }
                 do
                 {
                     addChar();
@@ -463,6 +509,7 @@ returns a non-whitespace character */
             default:
                 System.out.println("[!] Error at character '" + nextChar + "' on line: " + lineNumber);
                 nextToken = -1;
+                isValid = false;
         } /* End of switch */
 
         printResult();
@@ -500,32 +547,26 @@ returns a non-whitespace character */
 
     void printResult()
     {
-        String strLexeme = "";
-        for (Character a : lexemeList) {
-            strLexeme += a;
-        }
-
-        if(isValid)
+        if(endOfFile == false)
         {
-            System.out.println("Next token is: " + nextToken + ", Next lexeme is " + strLexeme);
+            String strLexeme = "";
+            for (Character a : lexemeList) {
+                strLexeme += a;
+            }
 
-//            for (char a : lexeme) {
-//                System.out.print(a);
-//            }
-//
-//            System.out.println();
-//
-//
-//            for (Character a : lexemeList) {
-//                System.out.print(a);
-//            }
-//            System.out.println();
+            if(isValid)
+                System.out.println("Token: " + nextToken + ", Lexeme: " + strLexeme);
+            else
+            {
+                isValid = true;
+                System.out.println("[!] Error -- Invalid Lexeme '" + strLexeme + "' on line " + lineNumber);
+            }
         }
         else
         {
-            isValid = true;
-            System.out.println("[!] Error -- Invalid Lexeme: " + strLexeme);
+            System.out.println("<end of file>");
         }
+
 
 
     }
