@@ -1,18 +1,10 @@
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class LexicalAnalyzer
 {
-    LexicalAnalyzer(FileInputStream inFis)
-    {
-        this.fis = inFis;
-    }
-
-    //Declaring Literals
+    /**************** KEYWORD DECLARATIONS **************************/
     final int DECIMAL = -2;
     final int LETTER = 0;
     final int CONSTANT_DECLARATION = 3;
@@ -30,48 +22,37 @@ public class LexicalAnalyzer
     final int LEFT_PAREN = 25;
     final int RIGHT_PAREN = 26;
     final int STRING_LITERAL = 27;
-
     final int SEMICOLON = 28;
     final int SPACE = 4;
-
     final int START_MAIN = 30;
-
     final int END_MAIN = 31;
-
     final int IF = 32;
     final int THEN = 33;
     final int END_IF = 34;
-
     final int ELSE = 35;
     final int END_ELSE = 36;
-
-    final int FOR = 37;
+    final int FOR_LOOP_ID = 37;
     final int SEPERATOR = 38;
-    final int LOOP = 39;
-    final int END_FOR = 40;
-    final int WHILE = 41;
-    final int END_WHILE = 42;
+    final int LOOP_KEYWORD = 39;
+    final int END_FOR_LOOP_ID = 40;
+    final int WHILE_ID = 41;
+    final int END_WHILE_ID = 42;
     final int LINE_COMMENT = 43;
     final int MULTI_LINE_COMMENT_BEGIN = 44;
     final int MULTI_LINE_COMMENT_END = 45;
-
     final int EQUAL_RELATION = 50;
     final int OR_RELATION = 51;
     final int LESS_RELATION = 52;
     final int GREATER_RELATION = 53;
-
     final int LESS_EQUAL_RELATION = 54;
     final int GREATER_EQUAL_RELATION = 55;
-
     final int TRUE = 54;
     final int FALSE = 55;
-
     final int INTEGER_DECLARATION = 60;
     final int FLOAT_DECLARATION = 61;
     final int STRING_DECLARATION = 62;
     final int BOOLEAN_DECLARATION = 63;
     final int CHARACTER_DECLARATION = 64;
-
     final int LENGTH_FUNCTION = 100;
     final int TOUPPER_FUNCTION = 101;
     final int TOLOWER_FUNCTION = 102;
@@ -81,44 +62,47 @@ public class LexicalAnalyzer
     final int RETURNS_FUNCTION_COMMAND = 106;
     final int VOID_IDENTIFIER_TYPE = 107;
     final int FUNCTION_END_STATEMENT = 108;
-
-
-
+    final int KEY_INPUT_READ = 109;
+    /**************** END KEYWORD DECLARATIONS **********************/
 
     //Global variables used for parsing and storing
     FileInputStream fis;
     int lineNumber = 1;
     int charClass;
-    char lexeme[] = new char[100];
     ArrayList<Character> lexemeList = new ArrayList<Character>();
-
     int decimalCount = 0;
-
     char nextChar;
     int lexLen;
     int functionLexeme;
     int nextToken;
-    int currentCount = 0;
-
     boolean endOfFile = false;
-    boolean isValidFunction = false;
     boolean checkCurrentChar = false;
     boolean isValid = true;
     char bufferChar;
     String functionCommand = "";
 
+    /**
+     * LexicalAnalyzer(FileInputStream)
+     * Parameter Constructor that requires user to pass File Input Stream to class
+     * in order to get input file for Lexical Analysis.
+     * @param inFis
+     */
+    LexicalAnalyzer(FileInputStream inFis)
+    {
+        this.fis = inFis;
+    }
 
-
-    /*****************************************************/
-
-
-
-
-
-/* lookup - a function to lookup operators and parentheses
-and return the token */
-    int lookup(char ch) {
-        switch (ch) {
+    /**
+     * lookup()
+     * This function is used to lookup unknown operators found in the input file.
+     * It will return the token number if found, else it will return -1
+     * @param ch - the unknown character to be checked
+     * @return nextToken
+     */
+    int lookup(char ch)
+    {
+        switch (ch)
+        {
             case '(':
                 addChar();
                 nextToken = LEFT_PAREN;
@@ -140,9 +124,7 @@ and return the token */
                 if(lexLen == 1)
                     nextToken = MULT_OP;
                 else {
-                    for(char c : lexeme)
-                        System.out.print(c);
-                    if(lexLen == 2 && lexeme[lexLen-1] == '#')
+                    if(lexLen == 2 && lexemeList.indexOf(lexLen-1) == '#')
                         nextToken = MULTI_LINE_COMMENT_END;
                 }
                 break;
@@ -151,7 +133,7 @@ and return the token */
                 if(lexLen == 1)
                     nextToken = LINE_COMMENT;
                 else {
-                    if(lexLen == 2 && lexeme[lexLen-1] == '*')
+                    if(lexLen == 2 && lexemeList.indexOf(lexLen-1) == '*')
                         nextToken = MULTI_LINE_COMMENT_BEGIN;
                 }
                 break;
@@ -165,11 +147,6 @@ and return the token */
                 break;
             case '=':
                 checkRelation();
-                //while (charClass == UNKNOWN) {
-                 //   addChar();
-                 //   getChar(fis);
-               // }
-                //System.out.println("Lex Len: " + lexLen);
                 if(lexLen == 2) {
                     nextToken = EQUAL_RELATION;
                     break;
@@ -206,9 +183,8 @@ and return the token */
                     break;
                 }
                 else {
-                    //System.out.println("Error on Line " + lineNumber + "!");
-                    nextToken = -1;
-                    isValid = false;
+                    if (lexLen == 1)
+                        nextToken = SEPERATOR;
                     break;
                 }
             case ';':
@@ -216,15 +192,23 @@ and return the token */
                 nextToken = SEMICOLON;
                 break;
             default:
-                //addChar();
-                //isValid = false;
-                nextToken = -1;
+                if(Character.isDefined(ch)) {
+                    isValid = false;
+                }
+                else
+                    nextToken = -1;
+
                 break;
         }
         return nextToken;
     }
 
 
+    /**
+     * checkRelation()
+     * This function is called to see whether or not an Unknown character (operator) is overloaded
+     * such as the == >= <= operators
+     */
     void checkRelation()
     {
         while (charClass == UNKNOWN && !Character.isWhitespace(nextChar)) {
@@ -233,44 +217,41 @@ and return the token */
         }
         checkCurrentChar = true;
         bufferChar = nextChar;
-        System.out.println(lexLen);
+        //System.out.println(lexLen);
     }
 
-    /*****************************************************/
-/* addChar - a function to add nextChar to lexeme */
+    /**
+     * addChar()
+     * This function adds a character to the lexeme array to create a word/string/character
+     */
     void addChar()
     {
         if (lexLen <= 98)
         {
             lexemeList.add(nextChar);
-            lexeme[lexLen++] = nextChar;
+            lexLen++;
             //lexeme[lexLen] = 0;
         } else
             System.out.println("Error - lexeme is too long");
     }
 
-    /*****************************************************/
-
-
+    /**
+     * checkCommand()
+     * Checks to see if scanned in string is a keyword in T_Type
+     * @return boolean -- true if a valid word is found
+     */
     boolean checkCommand()
     {
+        //Declaring local variables
         String command = "";
-
-        for(char letter : lexemeList) {
-            command += letter;
-        }
-
-//        for(Character letter : lexemeList)
-//        {
-//            System.out.print(letter);
-//        }
-//        System.out.println();
-
-
-        command = command.trim();
-        //System.out.println(command);
         boolean result = false;
 
+        //Creating word from char array
+        for(char letter : lexemeList)
+            command += letter;
+        command = command.trim();
+
+        //Checking to see if word is a keyword in T_Type
         switch(command)
         {
             case "START_MAIN":
@@ -322,7 +303,7 @@ and return the token */
                 result = true;
                 break;
             case "WHILE":
-                nextToken = WHILE;
+                nextToken = WHILE_ID;
                 result = true;
                 break;
             case "FUNCTION":
@@ -335,6 +316,22 @@ and return the token */
                 break;
             case "RETURN":
                 nextToken = RETURNS_FUNCTION_COMMAND;
+                result = true;
+                break;
+            case "FOR":
+                nextToken = FOR_LOOP_ID;
+                result = true;
+                break;
+            case "END_FOR":
+                nextToken = END_FOR_LOOP_ID;
+                result = true;
+                break;
+            case "LOOP":
+                nextToken = LOOP_KEYWORD;
+                result = true;
+                break;
+            case "END_WHILE":
+                nextToken = END_WHILE_ID;
                 result = true;
                 break;
             case "true":
@@ -353,17 +350,23 @@ and return the token */
                 nextToken = FUNCTION_END_STATEMENT;
                 result = true;
                 break;
-
+            case "key_input":
+                nextToken = KEY_INPUT_READ;
+                result = true;
+                break;
         }
-
         return result;
     }
 
-
-/* getChar - a function to get the next character of
-input and determine its character class */
+    /**
+     * getChar()
+     * This function is called to get a single character from the input file.
+     * The class of that character is then determined and set
+     * @param inputFile of FileInputStream - input file with T_Type Grammar
+     */
     void getChar(FileInputStream inputFile)
     {
+        //Check to see if there is an unchecked scanned character in buffer
         if(checkCurrentChar == true)
         {
             checkCurrentChar = false;
@@ -371,6 +374,7 @@ input and determine its character class */
         }
         else
         {
+            //Read input character from file
             try {
                 nextChar = (char) inputFile.read();
             } catch (IOException e) {
@@ -378,149 +382,47 @@ input and determine its character class */
             }
         }
 
+        //Determine the character class
         if(nextChar == '"')
             charClass = STRING_LITERAL;
-        else
+        else if(nextChar == '.')
         {
-            if(nextChar == '.')
-            {
-                decimalCount++;
-                charClass = DECIMAL;
-            }
-            else if(Character.isAlphabetic(nextChar))
-                    charClass = LETTER;
-            else if (Character.isDigit(nextChar))
-                charClass = DIGIT;
-            else if (nextChar == '_')
-                charClass = UNDERSCORE;
-            else
-                charClass = UNKNOWN;
+            decimalCount++;
+            charClass = DECIMAL;
         }
+        else if(Character.isAlphabetic(nextChar))
+                charClass = LETTER;
+        else if (Character.isDigit(nextChar))
+            charClass = DIGIT;
+        else if (nextChar == '_')
+            charClass = UNDERSCORE;
+        else
+            charClass = UNKNOWN;
  }
 
-
-
-    /*****************************************************/
-/* getNonBlank - a function to call getChar until it
-returns a non-whitespace character */
+    /**
+     * getNonBlank()
+     * This function is used to skip over all white spaces and blank spaces until a new character is reached
+     */
     void getNonBlank()
     {
-        while(Character.isSpaceChar(nextChar) || Character.isWhitespace(nextChar)) {
+        while(Character.isSpaceChar(nextChar) || Character.isWhitespace(nextChar))
+        {
             getChar(fis);
             if(nextChar == '\n')
                 lineNumber++;
         }
     }
 
-    /*****************************************************/
-
-    /* lex - a simple lexical analyzer for arithmetic
-    expressions */
-    int lex()
+    /**
+     * functionOperation()
+     * This function is called if a '.' is detected after an identifier declaration. This means that a string function
+     * may have been called (ie, length, to upper, etc)
+     * @param function - String that contains possible function command
+     */
+    boolean functionOperation(String function)
     {
-        lexLen = 0;
-        getNonBlank();
-        switch (charClass)
-        {
-            /* Parse identifiers */
-            case LETTER:
-                //Adding character to lexeme array and getting next character
-                addChar();
-                getChar(fis);
-                //Getting the rest of the word
-                while (charClass == LETTER || charClass == DIGIT || charClass == UNDERSCORE) {
-                    addChar();
-                    getChar(fis);
-                }
-                //Checking if identifier with function appended
-
-                if(!checkCommand())
-                    nextToken = IDENT;
-
-                if(charClass == DECIMAL && decimalCount == 1)
-                {
-                    getChar(fis);
-
-                    while (charClass == LETTER) {
-                        functionCommand += nextChar;
-                        getChar(fis);
-                    }
-
-
-                    functionOperation(functionCommand);
-
-                    if(isValidFunction)
-                        System.out.print("Function Token = " + functionLexeme + ", Function Lexeme " + functionCommand + " on ");
-                    else {
-                        System.out.println("[!] Error. Invalid Function Name: " + functionCommand);
-                        isValid = false;
-                    }
-                }
-                else if (decimalCount > 1)
-                    isValid = false;
-
-                break;
-            /* Parse integer literals */
-            case DIGIT:
-                addChar();
-                getChar(fis);
-                while (charClass == DIGIT || charClass == DECIMAL)
-                {
-                    addChar();
-                    getChar(fis);
-                    //checkCurrentChar = true;
-                }
-                //bufferChar = nextChar;
-                if(decimalCount == 1)
-                    nextToken = FLOAT_LIT;
-                else if(decimalCount == 0)
-                    nextToken = INT_LIT;
-                else
-                    isValid = false;
-                break;
-            /* Parentheses and operators */
-            case UNKNOWN:
-                lookup(nextChar);
-                getChar(fis);
-                if(nextToken == -1)
-                    endOfFile = true;
-                break;
-            /* null */
-            case -1:
-                nextToken = -1;
-                lexemeList.add('E');
-                lexemeList.add('O');
-                lexemeList.add('F');
-                lexemeList.add('0');
-                break;
-            case STRING_LITERAL:
-                do
-                {
-                    addChar();
-                    getChar(fis);
-                }
-                while(charClass != STRING_LITERAL);
-                //Getting last " from file
-                addChar();
-                getChar(fis);
-
-                nextToken = STRING_LITERAL;
-                break;
-            default:
-                System.out.println("[!] Error at character '" + nextChar + "' on line: " + lineNumber);
-                nextToken = -1;
-                isValid = false;
-        } /* End of switch */
-
-        printResult();
-        clearLexemeArray();
-
-
-        return nextToken;
-    } /* End of function lex */
-
-    void functionOperation(String function)
-    {
+        boolean isValidFunction = false;
         switch(function)
         {
             case "length":
@@ -536,15 +438,25 @@ returns a non-whitespace character */
                 isValidFunction = true;
                 break;
         }
+
+        return isValidFunction;
     }
 
+    /**
+     * clearLexemeArray()
+     * This function is called to clear the current lexeme array in order to start a new lex iteration
+     */
     void clearLexemeArray()
     {
-        Arrays.fill(lexeme, ' ');
         lexemeList.clear();
         decimalCount = 0;
     }
 
+    /**
+     * printResult()
+     * This function is called to print the lexeme/token results from the lex() function
+     * In even of error, it will print error condition
+     */
     void printResult()
     {
         if(endOfFile == false)
@@ -559,15 +471,111 @@ returns a non-whitespace character */
             else
             {
                 isValid = true;
-                System.out.println("[!] Error -- Invalid Lexeme '" + strLexeme + "' on line " + lineNumber);
+                System.out.println("[!] Error -- Invalid Syntax on line " + lineNumber);
             }
         }
         else
         {
             System.out.println("<end of file>");
         }
+    }
 
+    /**
+     * lex()
+     * This function implements most other functions in the Lexical Analyzer class. It will determine each token in a
+     * given input file
+     * @return returns the nextToken number. Returns -1 if end of file or error
+     */
+    int lex()
+    {
+        lexLen = 0;
+        getNonBlank();
+        switch (charClass)
+        {
+            //If class of character is letter, check to see if identifier or keyword
+            case LETTER:
+                //Adding character to lexeme array and getting next character
+                addChar();
+                getChar(fis);
+                //Getting the rest of the word
+                while (charClass == LETTER || charClass == DIGIT || charClass == UNDERSCORE) {
+                    addChar();
+                    getChar(fis);
+                }
+                //Checking if identifier with function appended
+                if(!checkCommand())
+                    nextToken = IDENT;
+                //Checking to see if the identifer has a function attachment
+                if(charClass == DECIMAL && decimalCount == 1)
+                {
+                    getChar(fis);
 
+                    while (charClass == LETTER) {
+                        functionCommand += nextChar;
+                        getChar(fis);
+                    }
 
+                    if(functionOperation(functionCommand))
+                        System.out.print("Function Token = " + functionLexeme + ", Function Lexeme " + functionCommand + " on ");
+                    else {
+                        System.out.println("[!] Error. Invalid Function Name: " + functionCommand);
+                        isValid = false;
+                    }
+                }
+                else if (decimalCount > 1)
+                    isValid = false;
+                break;
+
+            //If character is a digit, check to see if its and integer/floating point number
+            case DIGIT:
+                addChar();
+                getChar(fis);
+                while (charClass == DIGIT || charClass == DECIMAL)
+                {
+                    addChar();
+                    getChar(fis);
+                }
+                if(decimalCount == 1)
+                    nextToken = FLOAT_LIT;
+                else if(decimalCount == 0)
+                    nextToken = INT_LIT;
+                else
+                    isValid = false;
+                break;
+
+            //Check for unknown operators
+            case UNKNOWN:
+                lookup(nextChar);
+                getChar(fis);
+                if(nextToken == -1)
+                    endOfFile = true;
+                break;
+
+            //If " is found, get the rest of the string literal
+            case STRING_LITERAL:
+                do
+                {
+                    addChar();
+                    getChar(fis);
+                }
+                while(charClass != STRING_LITERAL);
+                //Getting last " from file
+                addChar();
+                getChar(fis);
+                nextToken = STRING_LITERAL;
+                break;
+
+            //Default print error in case of some unknown lex condition
+            default:
+                System.out.println("[!] Error at character '" + nextChar + "' on line: " + lineNumber);
+                nextToken = -1;
+                isValid = false;
+        }
+
+        //Print result from case to screen and clear lexeme array for next token
+        printResult();
+        clearLexemeArray();
+
+        return nextToken;
     }
 }

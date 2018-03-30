@@ -1,14 +1,17 @@
 START_MAIN
-  integer a;
+  integer a4;
   integer b;
 
   console("Input number 1: ");
+  key_input(a);
   console("Input number 2: ");
+  key_input(b);
+
   console("Sum = " + addTwoNums(a,b));
 END_MAIN
 
 FUNCTION addTwoNums(integer a, integer b) RETURNS integer
-  integer temp;
+  integer temp.toUpperCase;
   temp <= a + b;
   RETURN temp;
 END_FUNCTION addTwoNums
