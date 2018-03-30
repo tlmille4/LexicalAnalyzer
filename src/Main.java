@@ -22,10 +22,12 @@ public class Main {
         else
         {
             //Start lexical analyzer
+            System.out.printf("%-10s%-30s%n", "Token", "Lexeme");
+            System.out.printf("%-10s%-30s%n", "-----", "------");
             lex.getChar(fis);
             do {
                 lex.lex();
-            } while (lex.nextToken != -1);
+            } while (lex.nextToken != -1 && lex.continueScanning == true);
         }
     }
 }

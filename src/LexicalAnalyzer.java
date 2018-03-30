@@ -5,14 +5,14 @@ import java.util.ArrayList;
 public class LexicalAnalyzer
 {
     /**************** KEYWORD DECLARATIONS **************************/
-    final int DECIMAL = -2;
+    final int DECIMAL = 5;
     final int LETTER = 0;
     final int CONSTANT_DECLARATION = 3;
     final int DIGIT = 1;
     final int UNKNOWN = 99;
     final int FLOAT_LIT = 9;
     final int INT_LIT = 10;
-    final int IDENT = 11;
+    final int IDENTIFIER_VARIABLE = 11;
     final int UNDERSCORE = 12;
     final int ASSIGN_OP = 20;
     final int ADD_OP = 21;
@@ -23,14 +23,13 @@ public class LexicalAnalyzer
     final int RIGHT_PAREN = 26;
     final int STRING_LITERAL = 27;
     final int SEMICOLON = 28;
-    final int SPACE = 4;
     final int START_MAIN = 30;
     final int END_MAIN = 31;
     final int IF = 32;
     final int THEN = 33;
     final int END_IF = 34;
-    final int ELSE = 35;
-    final int END_ELSE = 36;
+    final int ELSE_ID = 35;
+    final int END_ELSE_ID = 36;
     final int FOR_LOOP_ID = 37;
     final int SEPERATOR = 38;
     final int LOOP_KEYWORD = 39;
@@ -46,8 +45,8 @@ public class LexicalAnalyzer
     final int GREATER_RELATION = 53;
     final int LESS_EQUAL_RELATION = 54;
     final int GREATER_EQUAL_RELATION = 55;
-    final int TRUE = 54;
-    final int FALSE = 55;
+    final int TRUE_BOOLEAN = 54;
+    final int FALSE_BOOLEAN = 55;
     final int INTEGER_DECLARATION = 60;
     final int FLOAT_DECLARATION = 61;
     final int STRING_DECLARATION = 62;
@@ -78,6 +77,7 @@ public class LexicalAnalyzer
     boolean endOfFile = false;
     boolean checkCurrentChar = false;
     boolean isValid = true;
+    boolean continueScanning = true;
     char bufferChar;
     String functionCommand = "";
 
@@ -197,7 +197,6 @@ public class LexicalAnalyzer
                 }
                 else
                     nextToken = -1;
-
                 break;
         }
         return nextToken;
@@ -211,13 +210,13 @@ public class LexicalAnalyzer
      */
     void checkRelation()
     {
-        while (charClass == UNKNOWN && !Character.isWhitespace(nextChar)) {
+        while (charClass == UNKNOWN && !Character.isWhitespace(nextChar))
+        {
             addChar();
             getChar(fis);
         }
         checkCurrentChar = true;
         bufferChar = nextChar;
-        //System.out.println(lexLen);
     }
 
     /**
@@ -334,12 +333,20 @@ public class LexicalAnalyzer
                 nextToken = END_WHILE_ID;
                 result = true;
                 break;
+            case "END_ELSE":
+                nextToken = END_ELSE_ID;
+                result = true;
+                break;
+            case "ELSE":
+                nextToken = ELSE_ID;
+                result = true;
+                break;
             case "true":
-                nextToken = TRUE;
+                nextToken = TRUE_BOOLEAN;
                 result = true;
                 break;
             case "false":
-                nextToken = FALSE;
+                nextToken = FALSE_BOOLEAN;
                 result = true;
                 break;
             case "void":
@@ -467,10 +474,11 @@ public class LexicalAnalyzer
             }
 
             if(isValid)
-                System.out.println("Token: " + nextToken + ", Lexeme: " + strLexeme);
+                System.out.printf("%-10d%-30s%n", nextToken, strLexeme);
             else
             {
                 isValid = true;
+                continueScanning = false;
                 System.out.println("[!] Error -- Invalid Syntax on line " + lineNumber);
             }
         }
@@ -504,8 +512,8 @@ public class LexicalAnalyzer
                 }
                 //Checking if identifier with function appended
                 if(!checkCommand())
-                    nextToken = IDENT;
-                //Checking to see if the identifer has a function attachment
+                    nextToken = IDENTIFIER_VARIABLE;
+                //Checking to see if the identifier has a function attachment
                 if(charClass == DECIMAL && decimalCount == 1)
                 {
                     getChar(fis);
@@ -516,7 +524,7 @@ public class LexicalAnalyzer
                     }
 
                     if(functionOperation(functionCommand))
-                        System.out.print("Function Token = " + functionLexeme + ", Function Lexeme " + functionCommand + " on ");
+                        System.out.printf("%-10d%-30s%n", functionLexeme, functionCommand);
                     else {
                         System.out.println("[!] Error. Invalid Function Name: " + functionCommand);
                         isValid = false;
@@ -567,7 +575,7 @@ public class LexicalAnalyzer
 
             //Default print error in case of some unknown lex condition
             default:
-                System.out.println("[!] Error at character '" + nextChar + "' on line: " + lineNumber);
+                System.out.println("[!] Error on line: " + lineNumber);
                 nextToken = -1;
                 isValid = false;
         }
