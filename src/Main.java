@@ -27,7 +27,7 @@ public class Main {
             lex.getChar(fis);
             do {
                 lex.lex();
-            } while (lex.nextToken != -1 && lex.continueScanning == true);
+            } while (lex.nextToken != -1 && lex.continueScanning == true && lex.lexLen < 100);
         }
     }
 }

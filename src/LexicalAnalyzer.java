@@ -45,8 +45,9 @@ public class LexicalAnalyzer
     final int GREATER_RELATION = 53;
     final int LESS_EQUAL_RELATION = 54;
     final int GREATER_EQUAL_RELATION = 55;
-    final int TRUE_BOOLEAN = 54;
-    final int FALSE_BOOLEAN = 55;
+    final int TRUE_BOOLEAN = 56;
+    final int FALSE_BOOLEAN = 57;
+    final int AND_RELATION = 58;
     final int INTEGER_DECLARATION = 60;
     final int FLOAT_DECLARATION = 61;
     final int STRING_DECLARATION = 62;
@@ -62,6 +63,8 @@ public class LexicalAnalyzer
     final int VOID_IDENTIFIER_TYPE = 107;
     final int FUNCTION_END_STATEMENT = 108;
     final int KEY_INPUT_READ = 109;
+    final int INCREMENT_OPERATOR = 110;
+    final int DECREMENT_OPERATOR = 111;
     /**************** END KEYWORD DECLARATIONS **********************/
 
     //Global variables used for parsing and storing
@@ -112,19 +115,39 @@ public class LexicalAnalyzer
                 nextToken = RIGHT_PAREN;
                 break;
             case '+':
-                addChar();
-                nextToken = ADD_OP;
+                checkRelation();
+                if(lexLen == 2 && getLexemeArrayContents().equals("++")) {
+                    nextToken = INCREMENT_OPERATOR;
+                    break;
+                }
+                else if(lexLen == 1)
+                {
+                    nextToken = ADD_OP;
+                    break;
+                }
+                else
+                    isValid = false;
                 break;
             case '-':
-                addChar();
-                nextToken = SUB_OP;
+                checkRelation();
+                if(lexLen == 2 && getLexemeArrayContents().equals("--")) {
+                    nextToken = DECREMENT_OPERATOR;
+                    break;
+                }
+                else if(lexLen == 1)
+                {
+                    nextToken = SUB_OP;
+                    break;
+                }
+                else
+                    isValid = false;
                 break;
             case '*':
                 checkRelation();
                 if(lexLen == 1)
                     nextToken = MULT_OP;
                 else {
-                    if(lexLen == 2 && lexemeList.indexOf(lexLen-1) == '#')
+                    if(lexLen == 2 && getLexemeArrayContents().equals("*#"))
                         nextToken = MULTI_LINE_COMMENT_END;
                 }
                 break;
@@ -133,7 +156,7 @@ public class LexicalAnalyzer
                 if(lexLen == 1)
                     nextToken = LINE_COMMENT;
                 else {
-                    if(lexLen == 2 && lexemeList.indexOf(lexLen-1) == '*')
+                    if(lexLen == 2 && getLexemeArrayContents().equals("#*"))
                         nextToken = MULTI_LINE_COMMENT_BEGIN;
                 }
                 break;
@@ -157,25 +180,31 @@ public class LexicalAnalyzer
                 }
             case '<':
                 checkRelation();
-                if(lexLen == 2) {
+                if(lexLen == 2 && getLexemeArrayContents().equals("<=")) {
                     nextToken = LESS_EQUAL_RELATION;
                     break;
                 }
-                else
+                else if(lexLen == 1)
                 {
                     nextToken = LESS_RELATION;
                     break;
                 }
+                else
+                    isValid = false;
+                break;
             case '>':
                 checkRelation();
-                if(lexLen == 2) {
+                if(lexLen == 2 && getLexemeArrayContents().equals(">=")) {
                     nextToken = GREATER_EQUAL_RELATION;
                     break;
                 }
-                else {
+                else if(lexLen == 1) {
                     nextToken = GREATER_RELATION;
                     break;
                 }
+                else
+                    isValid = false;
+                break;
             case '|':
                 checkRelation();
                 if(lexLen == 2) {
@@ -192,9 +221,8 @@ public class LexicalAnalyzer
                 nextToken = SEMICOLON;
                 break;
             default:
-                if(Character.isDefined(ch)) {
+                if(Character.isDefined(ch))
                     isValid = false;
-                }
                 else
                     nextToken = -1;
                 break;
@@ -202,6 +230,18 @@ public class LexicalAnalyzer
         return nextToken;
     }
 
+    /**
+     * getLexemeArrayContents()
+     * This function returns the lexeme as a string from lexemeArray
+     * @return temp - String of characters in lexeme
+     */
+    String getLexemeArrayContents()
+    {
+        String temp = "";
+        for(char a : lexemeList)
+            temp += a;
+        return temp;
+    }
 
     /**
      * checkRelation()
@@ -210,7 +250,7 @@ public class LexicalAnalyzer
      */
     void checkRelation()
     {
-        while (charClass == UNKNOWN && !Character.isWhitespace(nextChar))
+        while (charClass == UNKNOWN && !Character.isWhitespace(nextChar) && Character.isDefined(nextChar) && nextChar != ';')
         {
             addChar();
             getChar(fis);
@@ -361,6 +401,14 @@ public class LexicalAnalyzer
                 nextToken = KEY_INPUT_READ;
                 result = true;
                 break;
+            case "AND":
+                nextToken = AND_RELATION;
+                result = true;
+                break;
+            case "OR":
+                nextToken = OR_RELATION;
+                result = true;
+                break;
         }
         return result;
     }
@@ -468,13 +516,8 @@ public class LexicalAnalyzer
     {
         if(endOfFile == false)
         {
-            String strLexeme = "";
-            for (Character a : lexemeList) {
-                strLexeme += a;
-            }
-
             if(isValid)
-                System.out.printf("%-10d%-30s%n", nextToken, strLexeme);
+                System.out.printf("%-10d%-30s%n", nextToken, getLexemeArrayContents());
             else
             {
                 isValid = true;
