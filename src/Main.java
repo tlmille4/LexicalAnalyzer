@@ -8,6 +8,7 @@ import java.io.*;
 public class Main {
     public static void main(String[] args) throws IOException
     {
+
         File inputFile;
         FileInputStream fis;
 
@@ -15,6 +16,7 @@ public class Main {
         inputFile = new File("src/in.txt");
         fis = new FileInputStream(inputFile);
         LexicalAnalyzer lex = new LexicalAnalyzer(fis);
+        Parser parse = new Parser();
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 
         if (!(inputFile.exists()))

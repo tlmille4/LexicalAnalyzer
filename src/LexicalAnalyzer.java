@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class LexicalAnalyzer
 {
     /**************** KEYWORD DECLARATIONS **************************/
-    final int DECIMAL = 5;
+    public final int DECIMAL = 5;
     final int LETTER = 0;
     final int CONSTANT_DECLARATION = 3;
     final int DIGIT = 1;
