@@ -1,8 +1,13 @@
 import javax.naming.ldap.Control;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class Parser {
 
+    boolean isValid = true;
     enum ControlKeyword {WHILE, LOOP, FOR_LOOP_ID};
+
+    Deque<Integer> stack = new ArrayDeque<Integer>();
 
     /**************** KEYWORD DECLARATIONS **************************/
     public final int DECIMAL = 5;
@@ -71,8 +76,23 @@ public class Parser {
 
         void parseStatement(int in)
         {
+            checkStart(in);
+
+            isLoopControlStart(in);
 
 
+
+        }
+
+        void checkStart(int in)
+        {
+            if(in == START_MAIN)
+            {
+                if (stack.isEmpty())
+                    stack.add(in);
+                else
+                    isValid = false;
+            }
         }
 
         boolean isLoopControlStart(int inCommand)
