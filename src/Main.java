@@ -15,9 +15,12 @@ public class Main {
         //Getting input file from designated location
         inputFile = new File("src/in.txt");
         fis = new FileInputStream(inputFile);
-        LexicalAnalyzer lex = new LexicalAnalyzer(fis);
-        Parser parse = new Parser();
+        File lexFile = new File("lex.txt");
+        LexicalAnalyzer lex = new LexicalAnalyzer(fis, lexFile);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+
+
+        FileWriter fileWriter = new FileWriter(lexFile);
 
         if (!(inputFile.exists()))
             System.out.println("Error opening input file");

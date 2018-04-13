@@ -1,5 +1,4 @@
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 public class LexicalAnalyzer
@@ -69,6 +68,10 @@ public class LexicalAnalyzer
 
     //Global variables used for parsing and storing
     FileInputStream fis;
+    BufferedWriter out;
+    //BufferedWriter printOut = new BufferedWriter(new OutputStreamWriter(out));
+
+
     int lineNumber = 1;
     int charClass;
     ArrayList<Character> lexemeList = new ArrayList<Character>();
@@ -90,9 +93,16 @@ public class LexicalAnalyzer
      * in order to get input file for Lexical Analysis.
      * @param inFis
      */
-    LexicalAnalyzer(FileInputStream inFis)
+    LexicalAnalyzer(FileInputStream inFis, File inFile)
     {
         this.fis = inFis;
+        try {
+
+            this.out = new BufferedWriter(new FileWriter(inFile));
+        } catch(IOException ex)
+        {
+            System.err.println(ex);
+        }
     }
 
     /**
@@ -517,7 +527,16 @@ public class LexicalAnalyzer
         if(endOfFile == false)
         {
             if(isValid)
+            {
                 System.out.printf("%-10d%-30s%n", nextToken, getLexemeArrayContents());
+                try{
+                    out.write(Integer.toString(nextToken) + "\n");
+                } catch (IOException ex)
+                {
+                    System.err.println(ex);
+                }
+
+            }
             else
             {
                 isValid = true;
@@ -528,6 +547,14 @@ public class LexicalAnalyzer
         else
         {
             System.out.println("<end of file>");
+            try{
+                out.close();
+            }catch(IOException ex)
+            {
+
+            }
+
+
         }
     }
 

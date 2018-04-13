@@ -1,13 +1,21 @@
 import javax.naming.ldap.Control;
+import java.io.FileOutputStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class Parser {
 
+
+    FileOutputStream out;
     boolean isValid = true;
     enum ControlKeyword {WHILE, LOOP, FOR_LOOP_ID};
 
     Deque<Integer> stack = new ArrayDeque<Integer>();
+
+    Parser(FileOutputStream outFile)
+    {
+        outFile = this.out;
+    }
 
     /**************** KEYWORD DECLARATIONS **************************/
     public final int DECIMAL = 5;
