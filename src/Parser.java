@@ -14,7 +14,7 @@ public class Parser {
     int prevToken = -3;
     boolean endOfFile = false;
     boolean isValid = true;
-    int lineCount = 0;
+    int lineCount = 1;
     enum ControlKeyword {WHILE, LOOP, FOR_LOOP_ID};
 
     Deque<Integer> stack = new ArrayDeque<Integer>();
@@ -123,6 +123,7 @@ public class Parser {
             System.out.println(in);
             if(in == START_MAIN && stack.isEmpty())
             {
+                lineCount++;
                     stack.add(in);
                     checkCommands(getNextToken());
             }
@@ -136,7 +137,7 @@ public class Parser {
 
         void checkCommands(int in)
         {
-            lineCount++;
+
             System.out.println(in);
             switch(in)
             {
@@ -150,16 +151,18 @@ public class Parser {
                     break;
                 case SEMICOLON:
                     System.out.println("end of line");
+                    lineCount++;
                     checkCommands(getNextToken());
                     break;
                 case END_MAIN:
-                    currToken = -10;
                     currToken = getNextToken();
-                    if(currToken == -10)
+                    if(currToken == -1)
                     {
                         endOfFile = true;
                         printResult();
                     }
+                    else
+                        checkCommands(currToken);
                     break;
                 default:
                     isValid = false;
