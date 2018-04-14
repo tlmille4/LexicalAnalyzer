@@ -125,10 +125,62 @@ public class Parser {
             {
                 lineCount++;
                     stack.add(in);
+                    //checkStatementBlock(getNextToken());
                     checkCommands(getNextToken());
             }
             else if(in == FUNCTION_DECLARATION)
             {
+
+            }
+            else
+                isValid = false;
+        }
+
+        void checkStatementBlock(int in)
+        {
+            switch (in)
+            {
+                case IDENTIFIER_VARIABLE:
+                    break;
+                case INTEGER_DECLARATION:
+                    break;
+                case STRING_DECLARATION:
+                    break;
+                case BOOLEAN_DECLARATION:
+                    break;
+                case CHARACTER_DECLARATION:
+                    break;
+                case CONSTANT_DECLARATION:
+                    break;
+                case FLOAT_DECLARATION:
+                    break;
+                case CONSOLE_FUNCTION:
+                    break;
+                case WHILE_ID:
+                    break;
+                case FOR_LOOP_ID:
+                    break;
+                case IF:
+                    break;
+                default:
+                    isValid = false;
+                    System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
+            }
+        }
+
+        void checkDeclaration(int in)
+        {
+
+            if(in == IDENTIFIER_VARIABLE)
+            {
+                currToken = getNextToken();
+                switch (currToken)
+                {
+                    case SEMICOLON:
+                        break;
+                    case ASSIGN_OP:
+                        break;
+                }
 
             }
             else
@@ -141,6 +193,8 @@ public class Parser {
             System.out.println(in);
             switch(in)
             {
+                case ASSIGN_OP:
+                    checkCommands(getNextToken());
                 case IDENTIFIER_VARIABLE:
                     checkCommands(getNextToken());
                     break;
