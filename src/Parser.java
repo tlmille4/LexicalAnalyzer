@@ -1,20 +1,29 @@
 import javax.naming.ldap.Control;
+import javax.swing.plaf.synth.SynthUI;
 import java.io.FileOutputStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Scanner;
 
 public class Parser {
 
 
     FileOutputStream out;
+    Scanner in;
+    int currToken = -2;
+    int prevToken = -3;
+    boolean endOfFile = false;
     boolean isValid = true;
+    int lineCount = 0;
     enum ControlKeyword {WHILE, LOOP, FOR_LOOP_ID};
 
     Deque<Integer> stack = new ArrayDeque<Integer>();
 
-    Parser(FileOutputStream outFile)
+
+    Parser(Scanner in/*, FileOutputStream outFile*/)
     {
-        outFile = this.out;
+        this.in = in;
+        //this.out = outFile;
     }
 
     /**************** KEYWORD DECLARATIONS **************************/
@@ -84,7 +93,8 @@ public class Parser {
 
         void parseStatement(int in)
         {
-            checkStart(in);
+
+            checkTopLevel();
 
             isLoopControlStart(in);
 
@@ -92,15 +102,79 @@ public class Parser {
 
         }
 
-        void checkStart(int in)
+        int getNextToken()
         {
-            if(in == START_MAIN)
+
+            if(in.hasNextInt())
             {
-                if (stack.isEmpty())
-                    stack.add(in);
-                else
-                    isValid = false;
+                currToken = in.nextInt();
+                return currToken;
             }
+            else
+            {
+                endOfFile = true;
+                return -1;
+            }
+        }
+
+        void checkTopLevel()
+        {
+            int in = getNextToken();
+            System.out.println(in);
+            if(in == START_MAIN && stack.isEmpty())
+            {
+                    stack.add(in);
+                    checkCommands(getNextToken());
+            }
+            else if(in == FUNCTION_DECLARATION)
+            {
+
+            }
+            else
+                isValid = false;
+        }
+
+        void checkCommands(int in)
+        {
+            lineCount++;
+            System.out.println(in);
+            switch(in)
+            {
+                case IDENTIFIER_VARIABLE:
+                    checkCommands(getNextToken());
+                    break;
+                case INTEGER_DECLARATION:
+                    checkCommands(getNextToken());
+                    break;
+                case STRING_DECLARATION:
+                    break;
+                case SEMICOLON:
+                    System.out.println("end of line");
+                    checkCommands(getNextToken());
+                    break;
+                case END_MAIN:
+                    currToken = -10;
+                    currToken = getNextToken();
+                    if(currToken == -10)
+                    {
+                        endOfFile = true;
+                        printResult();
+                    }
+                    break;
+                default:
+                    isValid = false;
+                    System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
+
+            }
+        }
+
+        void printResult()
+        {
+            if(isValid == true)
+                System.out.println("[~] Parser Check Passed");
+            else
+                System.out.println("[!] Error: Parser Check Failed");
+
         }
 
         boolean isLoopControlStart(int inCommand)

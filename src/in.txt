@@ -1,3 +1,2 @@
-WHILE test > 0 LOOP 
-test--;
-END_WHILE
+START_MAIN
+integer a;

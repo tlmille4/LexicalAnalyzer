@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Scanner;
 
 /**
  * Main class/Lexical Analyzer driver class
@@ -33,6 +34,22 @@ public class Main {
             do {
                 lex.lex();
             } while (lex.nextToken != -1 && lex.continueScanning == true && lex.lexLen < 100);
+
+            if(lex.isValid == true)
+            {
+                System.out.println("TRUE");
+                Scanner in = new Scanner(new File("lex.txt"));
+                Parser parse = new Parser(in);
+                parse.checkTopLevel();
+
+//                while(in.hasNextInt())
+//                {
+//                    int intIn = in.nextInt();
+//                    System.out.println(intIn);
+//                }
+
+            }
+
         }
     }
 }
