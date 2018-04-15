@@ -94,7 +94,7 @@ public class Parser {
         void parseStatement(int in)
         {
 
-            checkTopLevel();
+            //checkTopLevel();
 
             isLoopControlStart(in);
 
@@ -117,9 +117,9 @@ public class Parser {
             }
         }
 
-        void checkTopLevel()
+        void checkTopLevel(int in)
         {
-            int in = getNextToken();
+            //int in = getNextToken();
             System.out.println(in);
             if(in == START_MAIN && stack.isEmpty())
             {
@@ -127,6 +127,12 @@ public class Parser {
                     stack.add(in);
                     //checkStatementBlock(getNextToken());
                     checkCommands(getNextToken());
+            }
+            else if (in == END_MAIN && (stack.peek() == START_MAIN))
+            {
+                stack.pop();
+                
+
             }
             else if(in == FUNCTION_DECLARATION)
             {
@@ -143,16 +149,22 @@ public class Parser {
                 case IDENTIFIER_VARIABLE:
                     break;
                 case INTEGER_DECLARATION:
+                    checkDeclaration(getNextToken());
                     break;
                 case STRING_DECLARATION:
+                    checkDeclaration(getNextToken());
                     break;
                 case BOOLEAN_DECLARATION:
+                    checkDeclaration(getNextToken());
                     break;
                 case CHARACTER_DECLARATION:
+                    checkDeclaration(getNextToken());
                     break;
                 case CONSTANT_DECLARATION:
+                    checkDeclaration(getNextToken());
                     break;
                 case FLOAT_DECLARATION:
+                    checkDeclaration(getNextToken());
                     break;
                 case CONSOLE_FUNCTION:
                     break;
@@ -177,6 +189,7 @@ public class Parser {
                 switch (currToken)
                 {
                     case SEMICOLON:
+                        checkNewLine();
                         break;
                     case ASSIGN_OP:
                         break;
@@ -185,6 +198,24 @@ public class Parser {
             }
             else
                 isValid = false;
+        }
+
+        void checkNewLine()
+        {
+            lineCount++;
+            currToken = getNextToken();
+
+            if(currToken == END_MAIN)
+            {
+                checkTopLevel(currToken);
+            }
+            else
+                checkStatementBlock(currToken);
+        }
+
+        void checkForFunction()
+        {
+
         }
 
         void checkCommands(int in)

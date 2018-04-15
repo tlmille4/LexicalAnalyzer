@@ -40,7 +40,7 @@ public class Main {
                 System.out.println("TRUE");
                 Scanner in = new Scanner(new File("lex.txt"));
                 Parser parse = new Parser(in);
-                parse.checkTopLevel();
+                parse.checkTopLevel(parse.getNextToken());
 
 //                while(in.hasNextInt())
 //                {
