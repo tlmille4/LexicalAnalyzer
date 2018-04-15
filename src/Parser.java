@@ -131,12 +131,17 @@ public class Parser {
             else if (in == END_MAIN && (stack.peek() == START_MAIN))
             {
                 stack.pop();
-                
-
+                stack.push(END_MAIN);
+                checkTopLevel(getNextToken());
             }
-            else if(in == FUNCTION_DECLARATION)
+            else if(in == FUNCTION_DECLARATION && (stack.peek() == END_MAIN))
             {
 
+            }
+            else if(in == -1)
+            {
+                endOfFile = true;
+                printResult();
             }
             else
                 isValid = false;
