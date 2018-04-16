@@ -1,3 +1,5 @@
 START_MAIN
-integer a;
+#* asdfas *#
+integer a = 6 + "hello";
+integer b = 7;
 END_MAIN

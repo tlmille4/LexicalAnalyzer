@@ -12,9 +12,11 @@ public class Parser {
     Scanner in;
     int currToken = -2;
     int prevToken = -3;
+    int currDeclaration = -1;
     boolean endOfFile = false;
     boolean isValid = true;
     int lineCount = 1;
+
     enum ControlKeyword {WHILE, LOOP, FOR_LOOP_ID};
 
     Deque<Integer> stack = new ArrayDeque<Integer>();
@@ -121,39 +123,90 @@ public class Parser {
         {
             //int in = getNextToken();
             System.out.println(in);
-            if(in == START_MAIN && stack.isEmpty())
+
+            switch(in)
             {
-                lineCount++;
-                    stack.add(in);
-                    //checkStatementBlock(getNextToken());
-                    checkCommands(getNextToken());
-            }
-            else if (in == END_MAIN && (stack.peek() == START_MAIN))
-            {
-                stack.pop();
-                stack.push(END_MAIN);
-                checkTopLevel(getNextToken());
-            }
-            else if(in == FUNCTION_DECLARATION && (stack.peek() == END_MAIN))
-            {
+                case MULTI_LINE_COMMENT_BEGIN:
+                    break;
+                case MULTI_LINE_COMMENT_END:
+                    break;
+                case LINE_COMMENT:
+                    break;
+                default:
+                    if(in == START_MAIN && stack.isEmpty())
+                    {
+                        lineCount++;
+                        stack.add(in);
+                        checkStatementBlock(getNextToken());
+                        //checkCommands(getNextToken());
+                    }
+                    else if (in == END_MAIN && (stack.peek() == START_MAIN))
+                    {
+                        stack.pop();
+                        stack.push(in);
+                        checkTopLevel(getNextToken());
+                    }
+                    else if(in == FUNCTION_DECLARATION && (stack.peek() == END_MAIN))
+                    {
+
+                    }
+                    else if(in == -1)
+                    {
+                        if(stack.peek() == END_MAIN)
+                            printResult();
+                        else
+                            printError();
+                    }
+                    else
+                        isValid = false;
 
             }
-            else if(in == -1)
-            {
-                endOfFile = true;
-                printResult();
-            }
-            else
-                isValid = false;
+
+//            if(in == START_MAIN && stack.isEmpty())
+//            {
+//                lineCount++;
+//                    stack.add(in);
+//                    checkStatementBlock(getNextToken());
+//                    //checkCommands(getNextToken());
+//            }
+//            else if (in == END_MAIN && (stack.peek() == START_MAIN))
+//            {
+//                stack.pop();
+//                stack.push(in);
+//                checkTopLevel(getNextToken());
+//            }
+//            else if(in == FUNCTION_DECLARATION && (stack.peek() == END_MAIN))
+//            {
+//
+//            }
+//            else if(in == -1)
+//            {
+//                if(stack.peek() == END_MAIN)
+//                    printResult();
+//                else
+//                    printError();
+//            }
+//            else
+//                isValid = false;
         }
 
         void checkStatementBlock(int in)
         {
             switch (in)
             {
+                case MULTI_LINE_COMMENT_BEGIN:
+                    do {
+                       currToken = getNextToken();
+                    } while(currToken != MULTI_LINE_COMMENT_END);
+                    checkStatementBlock(currToken);
+                    break;
+                case MULTI_LINE_COMMENT_END:
+                    checkStatementBlock(getNextToken());
+                    break;
                 case IDENTIFIER_VARIABLE:
                     break;
                 case INTEGER_DECLARATION:
+                    currDeclaration = INTEGER_DECLARATION;
                     checkDeclaration(getNextToken());
                     break;
                 case STRING_DECLARATION:
@@ -185,6 +238,22 @@ public class Parser {
             }
         }
 
+        void checkConstant(int in)
+        {
+            switch(in)
+            {
+                case FLOAT_DECLARATION:
+                case INTEGER_DECLARATION:
+                case STRING_DECLARATION:
+                case BOOLEAN_DECLARATION:
+                case CHARACTER_DECLARATION:
+                    checkDeclaration(getNextToken());
+                    break;
+                default:
+                    isValid = false;
+                    printError();
+            }
+        }
         void checkDeclaration(int in)
         {
 
@@ -197,25 +266,106 @@ public class Parser {
                         checkNewLine();
                         break;
                     case ASSIGN_OP:
+                        checkAssignment(getNextToken());
                         break;
+                    default:
+                        isValid = false;
+                        printError();
                 }
 
             }
-            else
+            else {
                 isValid = false;
+                printError();
+            }
+        }
+
+
+        void checkAssignment(int in)
+        {
+            switch (in)
+            {
+                case LEFT_PAREN:
+                    stack.push(in);
+                    checkAssignment(getNextToken());
+                    break;
+                case SUB_OP:
+                    checkAssignment(getNextToken());
+                    break;
+                case INT_LIT:
+                    if(currDeclaration == INTEGER_DECLARATION)
+                    {
+                        currToken = getNextToken();
+                        if (currToken == SEMICOLON)
+                        {
+                            checkNewLine();
+                            currDeclaration = -1;
+                        }
+                        else
+                            checkOperator(currToken);
+                    }
+                    else
+                        isValid = false;
+                    break;
+                case FLOAT_LIT:
+                    break;
+                case STRING_LITERAL:
+                    if(currDeclaration == STRING_DECLARATION)
+                    {
+
+                    }
+                    else
+                        printError();
+                    break;
+                case TRUE_BOOLEAN:
+                case FALSE_BOOLEAN:
+                    break;
+                case IDENTIFIER_VARIABLE:
+                    break;
+                default:
+                    isValid = false;
+                    printError();
+            }
+        }
+
+        void checkOperator(int in)
+        {
+            switch(in)
+            {
+                case ADD_OP:
+                    checkAssignment(getNextToken());
+                    break;
+                case SUB_OP:
+                case MULT_OP:
+                case DIV_OP:
+                    break;
+                default:
+                    isValid = false;
+                    printError();
+                    break;
+            }
+
+        }
+
+        void printError()
+        {
+            System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
         }
 
         void checkNewLine()
         {
-            lineCount++;
-            currToken = getNextToken();
-
-            if(currToken == END_MAIN)
+            if(isValid == true)
             {
-                checkTopLevel(currToken);
+                lineCount++;
+                currToken = getNextToken();
+
+                if (currToken == END_MAIN) {
+                    checkTopLevel(currToken);
+                } else
+                    checkStatementBlock(currToken);
             }
             else
-                checkStatementBlock(currToken);
+                System.out.println("SYNTAX ERROR ON LINE " + lineCount);
         }
 
         void checkForFunction()
