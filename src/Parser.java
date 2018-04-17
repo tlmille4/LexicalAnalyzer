@@ -318,11 +318,10 @@ public class Parser {
             switch(in)
             {
                 case ADD_OP:
-                    checkAssignment(getNextToken());
-                    break;
                 case SUB_OP:
                 case MULT_OP:
                 case DIV_OP:
+                    checkAssignment(getNextToken());
                     break;
                 default:
                     isValid = false;
