@@ -1,5 +1,5 @@
 START_MAIN
 #* asdfas *#
-integer a = 6 + "hello";
-integer b = 7;
+integer a = 6 + 5;
+integer b = a + nsdfg;
 END_MAIN

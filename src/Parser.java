@@ -293,34 +293,19 @@ public class Parser {
                     checkAssignment(getNextToken());
                     break;
                 case INT_LIT:
-                    if(currDeclaration == INTEGER_DECLARATION)
-                    {
-                        currToken = getNextToken();
-                        if (currToken == SEMICOLON)
-                        {
-                            checkNewLine();
-                            currDeclaration = -1;
-                        }
-                        else
-                            checkOperator(currToken);
-                    }
-                    else
-                        isValid = false;
+                    verifyRightSide(INTEGER_DECLARATION);
                     break;
                 case FLOAT_LIT:
+                    verifyRightSide(FLOAT_DECLARATION);
                     break;
                 case STRING_LITERAL:
-                    if(currDeclaration == STRING_DECLARATION)
-                    {
-
-                    }
-                    else
-                        printError();
+                    verifyRightSide(STRING_DECLARATION);
                     break;
                 case TRUE_BOOLEAN:
                 case FALSE_BOOLEAN:
                     break;
                 case IDENTIFIER_VARIABLE:
+                    verifyRightSide(IDENTIFIER_VARIABLE);
                     break;
                 default:
                     isValid = false;
@@ -344,7 +329,25 @@ public class Parser {
                     printError();
                     break;
             }
+        }
 
+        void verifyRightSide(int inType)
+        {
+            if(currDeclaration == inType || inType == IDENTIFIER_VARIABLE)
+            {
+                currToken = getNextToken();
+                if (currToken == SEMICOLON)
+                {
+                    checkNewLine();
+                    currDeclaration = -1;
+                }
+                else
+                    checkOperator(currToken);
+            }
+            else {
+                isValid = false;
+                printError();
+            }
         }
 
         void printError()
