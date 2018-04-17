@@ -210,21 +210,26 @@ public class Parser {
                     checkDeclaration(getNextToken());
                     break;
                 case STRING_DECLARATION:
+                    currDeclaration = STRING_DECLARATION;
                     checkDeclaration(getNextToken());
                     break;
                 case BOOLEAN_DECLARATION:
+                    currDeclaration = BOOLEAN_DECLARATION;
                     checkDeclaration(getNextToken());
                     break;
                 case CHARACTER_DECLARATION:
+                    currDeclaration = CHARACTER_DECLARATION;
                     checkDeclaration(getNextToken());
                     break;
                 case CONSTANT_DECLARATION:
                     checkDeclaration(getNextToken());
                     break;
                 case FLOAT_DECLARATION:
+                    currDeclaration = FLOAT_DECLARATION;
                     checkDeclaration(getNextToken());
                     break;
                 case CONSOLE_FUNCTION:
+                    checkConsoleFunction(getNextToken());
                     break;
                 case WHILE_ID:
                     break;
@@ -235,6 +240,26 @@ public class Parser {
                 default:
                     isValid = false;
                     System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
+            }
+        }
+
+        void checkConsoleFunction(int in)
+        {
+            if(in == LEFT_PAREN)
+            {
+                currToken = getNextToken();
+                if(currToken == IDENTIFIER_VARIABLE || currToken == STRING_LITERAL)
+                {
+                    currToken = getNextToken();
+
+
+                }
+
+            }
+            else
+            {
+                isValid = false;
+                printError();
             }
         }
 

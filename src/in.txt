@@ -2,4 +2,5 @@ START_MAIN
 #* asdfas *#
 integer a = 6 + 5;
 integer b = a + nsdfg;
+float c = 4.2;
 END_MAIN
