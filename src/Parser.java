@@ -14,6 +14,7 @@ public class Parser {
     int prevToken = -3;
     int currDeclaration = -1;
     boolean endOfFile = false;
+    boolean breakStatementBlock = false;
     boolean isValid = true;
     int lineCount = 1;
 
@@ -204,6 +205,10 @@ public class Parser {
                     checkStatementBlock(getNextToken());
                     break;
                 case IDENTIFIER_VARIABLE:
+                    isValid = false;
+
+                    
+
                     break;
                 case INTEGER_DECLARATION:
                     currDeclaration = INTEGER_DECLARATION;
@@ -229,6 +234,7 @@ public class Parser {
                     checkDeclaration(getNextToken());
                     break;
                 case CONSOLE_FUNCTION:
+                    System.out.println("--Entering Console");
                     checkConsoleFunction(getNextToken());
                     break;
                 case WHILE_ID:
@@ -236,10 +242,90 @@ public class Parser {
                 case FOR_LOOP_ID:
                     break;
                 case IF:
+                    checkIfConditional();
                     break;
                 default:
-                    isValid = false;
-                    System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
+                    if(currToken == END_IF)
+                    {
+                        System.out.println("TEST");
+                        breakStatementBlock = true;
+                    }
+                    else
+                    {
+                        isValid = false;
+                        System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
+                    }
+            }
+        }
+
+        void checkIfConditional()
+        {
+            if(checkCondition(getNextToken()))
+            {
+                currToken = getNextToken();
+                if(currToken == THEN)
+                {
+                    //STATEMENT BLOCK
+                    currToken = getNextToken();
+                    while((currToken != END_IF || currToken != ELSE_ID) && (breakStatementBlock == false) && isValid == true)
+                    {
+                        checkStatementBlock(currToken);
+                        //currToken = getNextToken();
+                    }
+                    System.out.println("FINAL TEST");
+                    checkNewLine();
+                }
+
+            }
+            else
+            {
+                printError();
+                isValid = false;
+            }
+        }
+
+        boolean checkCondition(int in)
+        {
+            switch(in)
+            {
+                case IDENTIFIER_VARIABLE:
+                case INT_LIT:
+                case FLOAT_LIT:
+                    if(checkComparator(getNextToken()))
+                    {
+                        currToken = getNextToken();
+
+                        return true;
+                    }
+                    else
+                    {
+                        isValid = false;
+                        printError();
+                        return false;
+                    }
+                case TRUE_BOOLEAN:
+                case FALSE_BOOLEAN:
+                    return true;
+                default:
+                    printError();
+                    return false;
+            }
+            //if(in == IDENTIFIER_VARIABLE || in == INT_LIT || in == FLOAT_LIT || in == TRUE_BOOLEAN || in == FALSE_BOOLEAN)
+
+        }
+
+        boolean checkComparator(int in)
+        {
+            switch(in)
+            {
+                case LESS_EQUAL_RELATION:
+                case LESS_RELATION:
+                case GREATER_EQUAL_RELATION:
+                case GREATER_RELATION:
+                case EQUAL_RELATION:
+                    return true;
+                default:
+                    return false;
             }
         }
 
@@ -248,12 +334,34 @@ public class Parser {
             if(in == LEFT_PAREN)
             {
                 currToken = getNextToken();
-                if(currToken == IDENTIFIER_VARIABLE || currToken == STRING_LITERAL)
+                boolean validSyntax = true;
+                while(validSyntax == true && currToken != RIGHT_PAREN)
                 {
-                    currToken = getNextToken();
-
-
+                    if (currToken == IDENTIFIER_VARIABLE || currToken == STRING_LITERAL)
+                    {
+                        currToken = getNextToken();
+                        if (currToken == ADD_OP)
+                        {
+                            currToken = getNextToken();
+                        }
+                        else if(currToken != RIGHT_PAREN)
+                            validSyntax = false;
+                    }
+                    else
+                        validSyntax = false;
                 }
+
+                if(currToken == RIGHT_PAREN && validSyntax == true)
+                {
+                    System.out.println("correct");
+                    currToken = getNextToken();
+                    if(currToken == SEMICOLON)
+                        checkNewLine();
+                    else
+                        printError();
+                }
+                else
+                    printError();
 
             }
             else
