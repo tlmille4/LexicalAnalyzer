@@ -3,9 +3,9 @@ START_MAIN
 integer a = 6 + 5;
 integer b = a + nsdfg;
 float c = 4.2;
-console(hi + bye);
+console("hi" + bye);
 IF 5 > 4 THEN
 integer a;
-why
+why = a+ b;
 END_IF
 END_MAIN

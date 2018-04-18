@@ -205,10 +205,15 @@ public class Parser {
                     checkStatementBlock(getNextToken());
                     break;
                 case IDENTIFIER_VARIABLE:
-                    isValid = false;
-
-                    
-
+                    currToken = getNextToken();
+                    if(currToken == ASSIGN_OP)
+                    {
+                        checkAssignment(getNextToken());
+                    }
+                    else {
+                        isValid = false;
+                        printError();
+                    }
                     break;
                 case INTEGER_DECLARATION:
                     currDeclaration = INTEGER_DECLARATION;
@@ -346,6 +351,8 @@ public class Parser {
                         }
                         else if(currToken != RIGHT_PAREN)
                             validSyntax = false;
+                        else if(currToken == STRING_LITERAL)
+                            currToken = getNextToken();
                     }
                     else
                         validSyntax = false;
