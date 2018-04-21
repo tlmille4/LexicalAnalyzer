@@ -1,9 +1,11 @@
 import com.sun.org.apache.bcel.internal.generic.NEW;
+import com.sun.xml.internal.bind.v2.model.core.ID;
 
 import javax.naming.ldap.Control;
 import javax.swing.plaf.synth.SynthUI;
 import java.io.FileOutputStream;
 import java.util.ArrayDeque;
+import java.util.Currency;
 import java.util.Deque;
 import java.util.Scanner;
 
@@ -165,6 +167,62 @@ public class Parser {
                     }
                     else if(in == FUNCTION_DECLARATION && (stack.peek() == END_MAIN))
                     {
+                        currToken = getNextToken();
+                        if(currToken == IDENTIFIER_VARIABLE)
+                        {
+                            currToken = getNextToken();
+                            if(currToken == LEFT_PAREN)
+                            {
+                                while(currToken != RIGHT_PAREN && isValid == true)
+                                {
+                                    currToken = getNextToken();
+                                    if(currToken == IDENTIFIER_VARIABLE || currToken == INT_LIT || currToken == FLOAT_LIT)
+                                    {
+                                        currToken = getNextToken();
+                                        if(currToken == COMMA_SEPARATOR)
+                                        {
+                                            isValid = true;
+                                        }
+                                    }
+                                    else
+                                        isValid = false;
+                                }
+
+                                if(isValid == true)
+                                {
+                                    currToken = getNextToken();
+                                    if (currToken == RETURNS_FUNCTION_COMMAND)
+                                    {
+                                        currToken = getNextToken();
+                                        switch(currToken)
+                                        {
+                                            case VOID_IDENTIFIER_TYPE:
+                                            case INTEGER_DECLARATION:
+                                            case STRING_DECLARATION:
+                                            case BOOLEAN_DECLARATION:
+                                            case CHARACTER_DECLARATION:
+                                            case FLOAT_DECLARATION:
+
+
+                                                
+
+
+                                                break;
+                                            default:
+                                                isValid = false;
+                                                printError();
+                                        }
+                                    }
+                                    else
+                                        printError();
+                                }
+                                else
+                                {
+                                    isValid = false;
+                                    printError();
+                                }
+                            }
+                        }
 
                     }
                     else if(in == -1)

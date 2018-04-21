@@ -42,13 +42,15 @@ public class Main {
                 Parser parse = new Parser(in);
                 parse.checkTopLevel(parse.getNextToken());
 
-//                while(in.hasNextInt())
-//                {
-//                    int intIn = in.nextInt();
-//                    System.out.println(intIn);
-//                }
+                if(parse.isValid == true)
+                {
+                    System.out.println("TRUE");
+                }
+
 
             }
+
+
 
         }
     }
