@@ -1,9 +1,12 @@
+import com.sun.org.apache.bcel.internal.generic.NEW;
+
 import java.io.*;
 import java.util.ArrayList;
 
 public class LexicalAnalyzer
 {
     /**************** KEYWORD DECLARATIONS **************************/
+    public final int NEW_LINE = -2;
     public final int DECIMAL = 5;
     final int LETTER = 0;
     final int CONSTANT_DECLARATION = 3;
@@ -163,8 +166,9 @@ public class LexicalAnalyzer
                 break;
             case '#':
                 checkRelation();
-                if(lexLen == 1)
+                if(lexLen == 1) {
                     nextToken = LINE_COMMENT;
+                }
                 else {
                     if(lexLen == 2 && getLexemeArrayContents().equals("#*"))
                         nextToken = MULTI_LINE_COMMENT_BEGIN;
@@ -475,7 +479,16 @@ public class LexicalAnalyzer
         {
             getChar(fis);
             if(nextChar == '\n')
+            {
                 lineNumber++;
+//                try {
+//                    out.write(Integer.toString(NEW_LINE) + "\n");
+//                }
+//                catch(IOException ex)
+//                {
+//                    System.err.println(ex);
+//                }
+            }
         }
     }
 

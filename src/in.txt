@@ -13,4 +13,10 @@ IF 5 > 4 THEN
 integer a;
 why = a + b;
 END_IF
+
+FOR i = 0 | i < 5 | i++ LOOP
+integer b;
+a = a + b;
+END_FOR
+
 END_MAIN

@@ -1,3 +1,5 @@
+import com.sun.org.apache.bcel.internal.generic.NEW;
+
 import javax.naming.ldap.Control;
 import javax.swing.plaf.synth.SynthUI;
 import java.io.FileOutputStream;
@@ -30,6 +32,7 @@ public class Parser {
     }
 
     /**************** KEYWORD DECLARATIONS **************************/
+    public final int NEW_LINE = -2;
     public final int DECIMAL = 5;
     final int LETTER = 0;
     final int CONSTANT_DECLARATION = 3;
@@ -110,7 +113,20 @@ public class Parser {
 
             if(in.hasNextInt())
             {
+
                 currToken = in.nextInt();
+//                System.out.println(currToken);
+//                if(currToken == NEW_LINE)
+//                {
+//                    do
+//                    {
+//                        lineCount++;
+//                        currToken = in.nextInt();
+//                        System.out.println(currToken);
+//                    }
+//                    while (currToken != NEW_LINE);
+//                }
+//                System.out.println(currToken);
                 return currToken;
             }
             else
@@ -246,24 +262,25 @@ public class Parser {
                 case WHILE_ID:
                     if(checkCondition(getNextToken()))
                     {
-                        currToken = getNextToken();
-                        if(currToken == LOOP_KEYWORD)
-                        {
-                            currToken = getNextToken();
-                            while(currToken != END_WHILE_ID && (breakStatementBlock == false) && isValid == true)
-                            {
-                                checkStatementBlock(currToken);
-                                //currToken = getNextToken();
-                            }
-                            System.out.println("ASDFASDFASFD TEST");
-                            checkNewLine();
-
-                        }
-                        else
-                        {
-                            isValid = false;
-                            printError();
-                        }
+                        loopBodyExecution(END_WHILE_ID);
+//                        currToken = getNextToken();
+//                        if(currToken == LOOP_KEYWORD)
+//                        {
+//                            currToken = getNextToken();
+//                            while(currToken != END_WHILE_ID && (breakStatementBlock == false) && isValid == true)
+//                            {
+//                                checkStatementBlock(currToken);
+//                                //currToken = getNextToken();
+//                            }
+//                            System.out.println("ASDFASDFASFD TEST");
+//                            checkNewLine();
+//
+//                        }
+//                        else
+//                        {
+//                            isValid = false;
+//                            printError();`
+//                        }
                     }
                     else
                     {
@@ -272,13 +289,14 @@ public class Parser {
                     }
                     break;
                 case FOR_LOOP_ID:
+                    checkForLoop();
                     break;
                 case IF:
                     checkIfConditional();
                     break;
                 default:
                     System.out.println(currToken);
-                    if(currToken == END_IF || currToken == END_WHILE_ID)
+                    if(currToken == END_IF || currToken == END_WHILE_ID || currToken == END_FOR_LOOP_ID)
                     {
                         System.out.println("TEST");
                         breakStatementBlock = true;
@@ -292,6 +310,64 @@ public class Parser {
             }
         }
 
+
+        void checkForLoop()
+        {
+
+            if (checkCondition(getNextToken()))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    currToken = getNextToken();
+                    if (currToken == SEPERATOR)
+                    {
+                        isValid = checkCondition(getNextToken());
+                    }
+                    else
+                    {
+                        isValid = false;
+                        break;
+                    }
+                }
+            }
+            else
+                isValid = false;
+
+
+
+            if(isValid == true)
+            {
+                loopBodyExecution(END_FOR_LOOP_ID);
+            }
+            else
+            {
+                isValid = false;
+                printError();
+            }
+        }
+
+        void loopBodyExecution(int loopTypeEndID)
+        {
+            currToken = getNextToken();
+            if(currToken == LOOP_KEYWORD)
+            {
+                currToken = getNextToken();
+                while(currToken != loopTypeEndID && (breakStatementBlock == false) && isValid == true)
+                {
+                    checkStatementBlock(currToken);
+                    //currToken = getNextToken();
+                }
+                System.out.println(loopTypeEndID + "loop TEST");
+                checkNewLine();
+
+            }
+            else
+            {
+                isValid = false;
+                System.out.println("etewrfasdfasdf");
+                printError();
+            }
+        }
 
         void checkIfConditional()
         {
@@ -328,7 +404,9 @@ public class Parser {
                 case FLOAT_LIT:
                     if(checkComparator(getNextToken()))
                     {
-                        currToken = getNextToken();
+                        if(currToken != INCREMENT_OPERATOR && currToken != DECREMENT_OPERATOR)
+                            currToken = getNextToken();
+                        System.out.println("NUM");
 
                         return true;
                     }
@@ -362,6 +440,9 @@ public class Parser {
                 case OR_RELATION:
                 case TRUE_BOOLEAN:
                 case FALSE_BOOLEAN:
+                case ASSIGN_OP:
+                case INCREMENT_OPERATOR:
+                case DECREMENT_OPERATOR:
                     return true;
                 default:
                     return false;
