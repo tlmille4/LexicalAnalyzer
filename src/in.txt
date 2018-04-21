@@ -4,8 +4,13 @@ integer a = 6 + 5;
 integer b = a + nsdfg;
 float c = 4.2;
 console("hi" + bye);
+
+WHILE 5 > 4 LOOP
+integer a;
+END_WHILE
+
 IF 5 > 4 THEN
 integer a;
-why = a+ b;
+why = a + b;
 END_IF
 END_MAIN

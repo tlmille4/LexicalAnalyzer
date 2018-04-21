@@ -157,6 +157,7 @@ public class Parser {
                             printResult();
                         else
                             printError();
+
                     }
                     else
                         isValid = false;
@@ -232,7 +233,7 @@ public class Parser {
                     checkDeclaration(getNextToken());
                     break;
                 case CONSTANT_DECLARATION:
-                    checkDeclaration(getNextToken());
+                    checkConstant(getNextToken());
                     break;
                 case FLOAT_DECLARATION:
                     currDeclaration = FLOAT_DECLARATION;
@@ -243,6 +244,32 @@ public class Parser {
                     checkConsoleFunction(getNextToken());
                     break;
                 case WHILE_ID:
+                    if(checkCondition(getNextToken()))
+                    {
+                        currToken = getNextToken();
+                        if(currToken == LOOP_KEYWORD)
+                        {
+                            currToken = getNextToken();
+                            while(currToken != END_WHILE_ID && (breakStatementBlock == false) && isValid == true)
+                            {
+                                checkStatementBlock(currToken);
+                                //currToken = getNextToken();
+                            }
+                            System.out.println("ASDFASDFASFD TEST");
+                            checkNewLine();
+
+                        }
+                        else
+                        {
+                            isValid = false;
+                            printError();
+                        }
+                    }
+                    else
+                    {
+                        isValid = false;
+                        printError();
+                    }
                     break;
                 case FOR_LOOP_ID:
                     break;
@@ -250,7 +277,8 @@ public class Parser {
                     checkIfConditional();
                     break;
                 default:
-                    if(currToken == END_IF)
+                    System.out.println(currToken);
+                    if(currToken == END_IF || currToken == END_WHILE_ID)
                     {
                         System.out.println("TEST");
                         breakStatementBlock = true;
@@ -259,9 +287,11 @@ public class Parser {
                     {
                         isValid = false;
                         System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
+
                     }
             }
         }
+
 
         void checkIfConditional()
         {
@@ -328,6 +358,10 @@ public class Parser {
                 case GREATER_EQUAL_RELATION:
                 case GREATER_RELATION:
                 case EQUAL_RELATION:
+                case AND_RELATION:
+                case OR_RELATION:
+                case TRUE_BOOLEAN:
+                case FALSE_BOOLEAN:
                     return true;
                 default:
                     return false;
@@ -411,12 +445,14 @@ public class Parser {
                     default:
                         isValid = false;
                         printError();
+
                 }
 
             }
             else {
                 isValid = false;
                 printError();
+
             }
         }
 
@@ -485,6 +521,7 @@ public class Parser {
             }
             else {
                 isValid = false;
+
                 printError();
             }
         }
@@ -499,6 +536,8 @@ public class Parser {
             if(isValid == true)
             {
                 lineCount++;
+                //Making sure to reset boolean to break away from statement block in case of conditional
+                breakStatementBlock = false;
                 currToken = getNextToken();
 
                 if (currToken == END_MAIN) {
