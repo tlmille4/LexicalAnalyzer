@@ -167,24 +167,36 @@ public class Parser {
                     }
                     else if(in == FUNCTION_DECLARATION && (stack.peek() == END_MAIN))
                     {
+
                         currToken = getNextToken();
                         if(currToken == IDENTIFIER_VARIABLE)
                         {
                             currToken = getNextToken();
                             if(currToken == LEFT_PAREN)
                             {
+
                                 while(currToken != RIGHT_PAREN && isValid == true)
                                 {
+
                                     currToken = getNextToken();
-                                    if(currToken == IDENTIFIER_VARIABLE || currToken == INT_LIT || currToken == FLOAT_LIT)
-                                    {
+                                    if (isValidDeclarationType(currToken)) {
+                                        System.out.println("TESTSTSDFSFASDFA");
                                         currToken = getNextToken();
-                                        if(currToken == COMMA_SEPARATOR)
+                                        if (currToken == IDENTIFIER_VARIABLE)
                                         {
-                                            isValid = true;
+                                            currToken = getNextToken();
+                                            if (currToken == COMMA_SEPARATOR)
+                                            {
+                                                isValid = true;
+                                            }
+                                            else if (currToken == RIGHT_PAREN)
+                                                isValid = true;
+                                            else
+                                                isValid = false;
                                         }
-                                    }
-                                    else
+                                        else
+                                            isValid = false;
+                                    } else
                                         isValid = false;
                                 }
 
@@ -202,11 +214,7 @@ public class Parser {
                                             case BOOLEAN_DECLARATION:
                                             case CHARACTER_DECLARATION:
                                             case FLOAT_DECLARATION:
-
-
-                                                
-
-
+                                                checkStatementBlock(getNextToken());
                                                 break;
                                             default:
                                                 isValid = false;
@@ -238,6 +246,7 @@ public class Parser {
 
             }
 
+
 //            if(in == START_MAIN && stack.isEmpty())
 //            {
 //                lineCount++;
@@ -264,6 +273,22 @@ public class Parser {
 //            }
 //            else
 //                isValid = false;
+        }
+
+        boolean isValidDeclarationType(int in)
+        {
+            switch(in)
+            {
+                case VOID_IDENTIFIER_TYPE:
+                case INTEGER_DECLARATION:
+                case STRING_DECLARATION:
+                case BOOLEAN_DECLARATION:
+                case CHARACTER_DECLARATION:
+                case FLOAT_DECLARATION:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         void checkStatementBlock(int in)
@@ -358,6 +383,14 @@ public class Parser {
                     {
                         System.out.println("TEST");
                         breakStatementBlock = true;
+                    }
+                    else if (currToken == FUNCTION_END_STATEMENT)
+                    {
+                        currToken = getNextToken();
+                        if (currToken == IDENTIFIER_VARIABLE)
+                            checkTopLevel(getNextToken());
+                        else
+                            printError();
                     }
                     else
                     {

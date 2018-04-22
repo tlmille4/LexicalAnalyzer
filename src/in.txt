@@ -1,22 +1,4 @@
 START_MAIN
-#* asdfas *#
-integer a = 6 + 5;
-integer b = a + nsdfg;
-float c = 4.2;
-console("hi" + bye);
-
-WHILE 5 > 4 LOOP
 integer a;
-END_WHILE
-
-IF 5 > 4 THEN
-integer a;
-why = a + b;
-END_IF
-
-FOR i = 0 | i < 5 | i++ LOOP
-integer b;
-a = a + b;
-END_FOR
-
 END_MAIN
+

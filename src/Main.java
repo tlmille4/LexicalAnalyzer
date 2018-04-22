@@ -6,6 +6,7 @@ import java.util.Scanner;
  * This class will create an instance of the Lexical Analyzer and allow it to run
  * until the end of the file is reached.
  */
+
 public class Main {
     public static void main(String[] args) throws IOException
     {
@@ -17,6 +18,7 @@ public class Main {
         inputFile = new File("src/in.txt");
         fis = new FileInputStream(inputFile);
         File lexFile = new File("lex.txt");
+        File javaOut = new File("javaout.java");
         LexicalAnalyzer lex = new LexicalAnalyzer(fis, lexFile);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 
@@ -44,7 +46,14 @@ public class Main {
 
                 if(parse.isValid == true)
                 {
+                    fis = new FileInputStream(inputFile);
                     System.out.println("TRUE");
+                    Translator translator = new Translator(fis, javaOut);
+                    translator.getChar(fis);
+                    do {
+                        translator.lex();
+                    } while (translator.nextToken != "-1" && translator.continueScanning == true && translator.lexLen < 100);
+                    translator.out.close();
                 }
 
 
