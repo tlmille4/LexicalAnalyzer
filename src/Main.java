@@ -30,6 +30,9 @@ public class Main {
         else
         {
             //Start lexical analyzer
+            System.out.println("||||||||||||||||||||||||||||");
+            System.out.println("||||  Lexical Analyzer  ||||");
+            System.out.println("||||||||||||||||||||||||||||");
             System.out.printf("%-10s%-30s%n", "Token", "Lexeme");
             System.out.printf("%-10s%-30s%n", "-----", "------");
             lex.getChar(fis);
@@ -39,15 +42,21 @@ public class Main {
 
             if(lex.isValid == true)
             {
-                System.out.println("TRUE");
+                System.out.println("|||||||||||||||||||||||");
+                System.out.println("||||    PARSER     ||||");
+                System.out.println("|||||||||||||||||||||||");
+                System.out.println("Checking Syntax Validity . . .");
                 Scanner in = new Scanner(new File("lex.txt"));
                 Parser parse = new Parser(in);
                 parse.checkTopLevel(parse.getNextToken());
 
                 if(parse.isValid == true)
                 {
+                    System.out.println("|||||||||||||||||||||||");
+                    System.out.println("||||  TRANSLATOR   ||||");
+                    System.out.println("|||||||||||||||||||||||");
+                    System.out.println("Translating T_Type file to Java file . . .");
                     fis = new FileInputStream(inputFile);
-                    System.out.println("TRUE");
                     Translator translator = new Translator(fis, javaOut);
                     translator.getChar(fis);
                     do {

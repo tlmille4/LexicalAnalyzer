@@ -559,7 +559,7 @@ public class LexicalAnalyzer
         }
         else
         {
-            System.out.println("<end of file>");
+            System.out.println("<end of file>\n");
             try{
                 out.close();
             }catch(IOException ex)

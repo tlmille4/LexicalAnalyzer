@@ -289,7 +289,6 @@ public class Translator
         {
             lexemeList.add(nextChar);
             lexLen++;
-            //lexeme[lexLen] = 0;
         } else
             System.out.println("Error - lexeme is too long");
     }
@@ -315,7 +314,7 @@ public class Translator
         {
             case "START_MAIN":
                 nextToken = "public class Test {\n" +
-                        "\tpublic static void main(String[] args) {\n";
+                        "public static void main(String[] args) {\n";
                 result = true;
                 break;
             case "END_MAIN":
@@ -366,34 +365,22 @@ public class Translator
                 nextToken = "while(";
                 result = true;
                 break;
-//                case "FUNCTION":
-//                    nextToken = FUNCTION_DECLARATION;
-//                    result = true;
-//                    break;
-//                case "RETURNS":
-//                    nextToken = RETURNS_FUNCTION_COMMAND;
-//                    result = true;
-//                    break;
-//                case "RETURN":
-//                    nextToken = RETURNS_FUNCTION_COMMAND;
-//                    result = true;
-//                    break;
-                case "FOR":
-                    nextToken = "for(";
-                    result = true;
-                    break;
-                case "END_FOR":
-                    nextToken = "\n}";
-                    result = true;
-                    break;
-                case "LOOP":
-                    nextToken = ")\n{\n";
-                    result = true;
-                    break;
-                case "END_WHILE":
-                    nextToken = "\n}";
-                    result = true;
-                    break;
+            case "FOR":
+                nextToken = "for(";
+                result = true;
+                break;
+            case "END_FOR":
+                nextToken = "\n}";
+                result = true;
+                break;
+            case "LOOP":
+                nextToken = ")\n{\n";
+                result = true;
+                break;
+            case "END_WHILE":
+                nextToken = "\n}";
+                result = true;
+                break;
             case "END_ELSE":
                 nextToken = "\n}\n";
                 result = true;
@@ -410,26 +397,26 @@ public class Translator
                 nextToken = "false ";
                 result = true;
                 break;
-//                case "void":
-//                    nextToken = VOID_IDENTIFIER_TYPE;
-//                    result = true;
-//                    break;
-//                case "END_FUNCTION":
-//                    nextToken = FUNCTION_END_STATEMENT;
-//                    result = true;
-//                    break;
-//                case "key_input":
-//                    nextToken = KEY_INPUT_READ;
-//                    result = true;
-//                    break;
-//                case "AND":
-//                    nextToken = AND_RELATION;
-//                    result = true;
-//                    break;
-//                case "OR":
-//                    nextToken = OR_RELATION;
-//                    result = true;
-//                    break;
+            case "void":
+                nextToken = "void ";
+                result = true;
+                break;
+            case "END_FUNCTION":
+                nextToken = "\n}\n";
+                result = true;
+                break;
+            case "key_input":
+                nextToken = "";
+                result = true;
+                break;
+            case "AND":
+                nextToken = "&& ";
+                result = true;
+                break;
+            case "OR":
+                nextToken = "|| ";
+                result = true;
+                break;
         }
         return result;
     }
@@ -486,16 +473,7 @@ public class Translator
         {
             getChar(fis);
             if(nextChar == '\n')
-            {
                 lineNumber++;
-//                try {
-//                    out.write(Integer.toString(NEW_LINE) + "\n");
-//                }
-//                catch(IOException ex)
-//                {
-//                    System.err.println(ex);
-//                }
-            }
         }
     }
 
@@ -565,12 +543,13 @@ public class Translator
         }
         else
         {
-            System.out.println("<end of file>");
+            System.out.println("[~] T_Type to Java file Conversion Complete.");
             try{
                 out.close();
-            }catch(IOException ex)
+            }
+            catch(IOException ex)
             {
-
+                System.out.println(ex);
             }
 
 
@@ -599,12 +578,10 @@ public class Translator
                     addChar();
                     getChar(fis);
                 }
-                System.out.println(getLexemeArrayContents());
                 //Checking if identifier with function appended
-                if(!checkCommand()) {
+                if(!checkCommand())
                     nextToken = getLexemeArrayContents() + " ";
-                    System.out.println("not a command");//nextToken = IDENTIFIER_VARIABLE;
-                }
+
                 //Checking to see if the identifier has a function attachment
                 if(charClass == DECIMAL && decimalCount == 1)
                 {
@@ -645,10 +622,9 @@ public class Translator
 
             //Check for unknown operators
             case UNKNOWN:
-                System.out.println(nextChar);
                 lookup(nextChar);
                 getChar(fis);
-                if(nextToken == "\\u001a")
+                if(nextToken == "-1")
                     endOfFile = true;
                 break;
 
@@ -670,6 +646,7 @@ public class Translator
             default:
                 System.out.println("[!] Error on line: " + lineNumber);
                 nextToken = "-1";
+                endOfFile = true;
                 isValid = false;
         }
 

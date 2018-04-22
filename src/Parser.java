@@ -1,18 +1,9 @@
-import com.sun.org.apache.bcel.internal.generic.NEW;
-import com.sun.xml.internal.bind.v2.model.core.ID;
-
-import javax.naming.ldap.Control;
-import javax.swing.plaf.synth.SynthUI;
 import java.io.FileOutputStream;
 import java.util.ArrayDeque;
-import java.util.Currency;
 import java.util.Deque;
 import java.util.Scanner;
 
 public class Parser {
-
-
-    FileOutputStream out;
     Scanner in;
     int currToken = -2;
     int prevToken = -3;
@@ -21,8 +12,6 @@ public class Parser {
     boolean breakStatementBlock = false;
     boolean isValid = true;
     int lineCount = 1;
-
-    enum ControlKeyword {WHILE, LOOP, FOR_LOOP_ID};
 
     Deque<Integer> stack = new ArrayDeque<Integer>();
 
@@ -99,16 +88,16 @@ public class Parser {
 
 
 
-        void parseStatement(int in)
-        {
-
-            //checkTopLevel();
-
-            isLoopControlStart(in);
-
-
-
-        }
+//        void parseStatement(int in)
+//        {
+//
+//            //checkTopLevel();
+//
+//            isLoopControlStart(in);
+//
+//
+//
+//        }
 
         int getNextToken()
         {
@@ -140,14 +129,16 @@ public class Parser {
 
         void checkTopLevel(int in)
         {
-            //int in = getNextToken();
-            System.out.println(in);
-
             switch(in)
             {
                 case MULTI_LINE_COMMENT_BEGIN:
+                    do {
+                        currToken = getNextToken();
+                    } while(currToken != MULTI_LINE_COMMENT_END);
+                    checkTopLevel(currToken);
                     break;
                 case MULTI_LINE_COMMENT_END:
+                    checkTopLevel(getNextToken());
                     break;
                 case LINE_COMMENT:
                     break;
@@ -157,7 +148,6 @@ public class Parser {
                         lineCount++;
                         stack.add(in);
                         checkStatementBlock(getNextToken());
-                        //checkCommands(getNextToken());
                     }
                     else if (in == END_MAIN && (stack.peek() == START_MAIN))
                     {
@@ -180,7 +170,6 @@ public class Parser {
 
                                     currToken = getNextToken();
                                     if (isValidDeclarationType(currToken)) {
-                                        System.out.println("TESTSTSDFSFASDFA");
                                         currToken = getNextToken();
                                         if (currToken == IDENTIFIER_VARIABLE)
                                         {
@@ -245,34 +234,6 @@ public class Parser {
                         isValid = false;
 
             }
-
-
-//            if(in == START_MAIN && stack.isEmpty())
-//            {
-//                lineCount++;
-//                    stack.add(in);
-//                    checkStatementBlock(getNextToken());
-//                    //checkCommands(getNextToken());
-//            }
-//            else if (in == END_MAIN && (stack.peek() == START_MAIN))
-//            {
-//                stack.pop();
-//                stack.push(in);
-//                checkTopLevel(getNextToken());
-//            }
-//            else if(in == FUNCTION_DECLARATION && (stack.peek() == END_MAIN))
-//            {
-//
-//            }
-//            else if(in == -1)
-//            {
-//                if(stack.peek() == END_MAIN)
-//                    printResult();
-//                else
-//                    printError();
-//            }
-//            else
-//                isValid = false;
         }
 
         boolean isValidDeclarationType(int in)
@@ -339,31 +300,12 @@ public class Parser {
                     checkDeclaration(getNextToken());
                     break;
                 case CONSOLE_FUNCTION:
-                    System.out.println("--Entering Console");
                     checkConsoleFunction(getNextToken());
                     break;
                 case WHILE_ID:
                     if(checkCondition(getNextToken()))
                     {
                         loopBodyExecution(END_WHILE_ID);
-//                        currToken = getNextToken();
-//                        if(currToken == LOOP_KEYWORD)
-//                        {
-//                            currToken = getNextToken();
-//                            while(currToken != END_WHILE_ID && (breakStatementBlock == false) && isValid == true)
-//                            {
-//                                checkStatementBlock(currToken);
-//                                //currToken = getNextToken();
-//                            }
-//                            System.out.println("ASDFASDFASFD TEST");
-//                            checkNewLine();
-//
-//                        }
-//                        else
-//                        {
-//                            isValid = false;
-//                            printError();`
-//                        }
                     }
                     else
                     {
@@ -378,10 +320,8 @@ public class Parser {
                     checkIfConditional();
                     break;
                 default:
-                    System.out.println(currToken);
                     if(currToken == END_IF || currToken == END_WHILE_ID || currToken == END_FOR_LOOP_ID)
                     {
-                        System.out.println("TEST");
                         breakStatementBlock = true;
                     }
                     else if (currToken == FUNCTION_END_STATEMENT)
@@ -448,14 +388,12 @@ public class Parser {
                     checkStatementBlock(currToken);
                     //currToken = getNextToken();
                 }
-                System.out.println(loopTypeEndID + "loop TEST");
                 checkNewLine();
 
             }
             else
             {
                 isValid = false;
-                System.out.println("etewrfasdfasdf");
                 printError();
             }
         }
@@ -474,7 +412,6 @@ public class Parser {
                         checkStatementBlock(currToken);
                         //currToken = getNextToken();
                     }
-                    System.out.println("FINAL TEST");
                     checkNewLine();
                 }
 
@@ -497,8 +434,6 @@ public class Parser {
                     {
                         if(currToken != INCREMENT_OPERATOR && currToken != DECREMENT_OPERATOR)
                             currToken = getNextToken();
-                        System.out.println("NUM");
-
                         return true;
                     }
                     else
@@ -514,7 +449,6 @@ public class Parser {
                     printError();
                     return false;
             }
-            //if(in == IDENTIFIER_VARIABLE || in == INT_LIT || in == FLOAT_LIT || in == TRUE_BOOLEAN || in == FALSE_BOOLEAN)
 
         }
 
@@ -566,7 +500,6 @@ public class Parser {
 
                 if(currToken == RIGHT_PAREN && validSyntax == true)
                 {
-                    System.out.println("correct");
                     currToken = getNextToken();
                     if(currToken == SEMICOLON)
                         checkNewLine();
@@ -718,68 +651,64 @@ public class Parser {
                     checkStatementBlock(currToken);
             }
             else
-                System.out.println("SYNTAX ERROR ON LINE " + lineCount);
+                printError();
         }
 
-        void checkForFunction()
-        {
 
-        }
-
-        void checkCommands(int in)
-        {
-
-            System.out.println(in);
-            switch(in)
-            {
-                case ASSIGN_OP:
-                    checkCommands(getNextToken());
-                case IDENTIFIER_VARIABLE:
-                    checkCommands(getNextToken());
-                    break;
-                case INTEGER_DECLARATION:
-                    checkCommands(getNextToken());
-                    break;
-                case STRING_DECLARATION:
-                    break;
-                case SEMICOLON:
-                    System.out.println("end of line");
-                    lineCount++;
-                    checkCommands(getNextToken());
-                    break;
-                case END_MAIN:
-                    currToken = getNextToken();
-                    if(currToken == -1)
-                    {
-                        endOfFile = true;
-                        printResult();
-                    }
-                    else
-                        checkCommands(currToken);
-                    break;
-                default:
-                    isValid = false;
-                    System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
-
-            }
-        }
+//        void checkCommands(int in)
+//        {
+//
+//            System.out.println(in);
+//            switch(in)
+//            {
+//                case ASSIGN_OP:
+//                    checkCommands(getNextToken());
+//                case IDENTIFIER_VARIABLE:
+//                    checkCommands(getNextToken());
+//                    break;
+//                case INTEGER_DECLARATION:
+//                    checkCommands(getNextToken());
+//                    break;
+//                case STRING_DECLARATION:
+//                    break;
+//                case SEMICOLON:
+//                    System.out.println("end of line");
+//                    lineCount++;
+//                    checkCommands(getNextToken());
+//                    break;
+//                case END_MAIN:
+//                    currToken = getNextToken();
+//                    if(currToken == -1)
+//                    {
+//                        endOfFile = true;
+//                        printResult();
+//                    }
+//                    else
+//                        checkCommands(currToken);
+//                    break;
+//                default:
+//                    isValid = false;
+//                    System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
+//
+//            }
+//        }
 
         void printResult()
         {
             if(isValid == true)
-                System.out.println("[~] Parser Check Passed");
+                System.out.println("[~] Parser Check Passed\n");
             else
-                System.out.println("[!] Error: Parser Check Failed");
+                System.out.println("[!] Error: Parser Check Failed\n");
 
         }
 
-        boolean isLoopControlStart(int inCommand)
-        {
-            if (inCommand == WHILE_ID || inCommand == FOR_LOOP_ID)
-            {
-                return true;
-            }
-            else
-                return false;
-        }
+//        boolean isLoopControlStart(int inCommand)
+//        {
+//            if (inCommand == WHILE_ID || inCommand == FOR_LOOP_ID)
+//            {
+//                return true;
+//            }
+//            else
+//                return false;
+//        }
 }
