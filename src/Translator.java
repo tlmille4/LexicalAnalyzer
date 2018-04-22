@@ -136,12 +136,12 @@ public class Translator
                 case '+':
                     checkRelation();
                     if(lexLen == 2 && getLexemeArrayContents().equals("++")) {
-                        nextToken = "++";
+                        nextToken = "++ ";
                         break;
                     }
                     else if(lexLen == 1)
                     {
-                        nextToken = "+";
+                        nextToken = "+ ";
                         break;
                     }
                     else
@@ -150,12 +150,12 @@ public class Translator
                 case '-':
                     checkRelation();
                     if(lexLen == 2 && getLexemeArrayContents().equals("--")) {
-                        nextToken = "--";
+                        nextToken = "-- ";
                         break;
                     }
                     else if(lexLen == 1)
                     {
-                        nextToken = "-";
+                        nextToken = "- ";
                         break;
                     }
                     else
@@ -164,7 +164,7 @@ public class Translator
                 case '*':
                     checkRelation();
                     if(lexLen == 1)
-                        nextToken = "*";
+                        nextToken = "* ";
                     else {
                         if(lexLen == 2 && getLexemeArrayContents().equals("*#"))
                             nextToken = "*/";
@@ -182,31 +182,31 @@ public class Translator
                     break;
                 case '/':
                     addChar();
-                    nextToken = "/";
+                    nextToken = "/ ";
                     break;
                 case ',':
                     addChar();
-                    nextToken = ",";
+                    nextToken = ", ";
                     break;
                 case '=':
                     checkRelation();
                     if(lexLen == 2) {
-                        nextToken = "==";
+                        nextToken = "== ";
                         break;
                     }
                     else {
-                        nextToken = "=";
+                        nextToken = "= ";
                         break;
                     }
                 case '<':
                     checkRelation();
                     if(lexLen == 2 && getLexemeArrayContents().equals("<=")) {
-                        nextToken = "<=";
+                        nextToken = "<= ";
                         break;
                     }
                     else if(lexLen == 1)
                     {
-                        nextToken = "<";
+                        nextToken = "< ";
                         break;
                     }
                     else
@@ -215,11 +215,11 @@ public class Translator
                 case '>':
                     checkRelation();
                     if(lexLen == 2 && getLexemeArrayContents().equals(">=")) {
-                        nextToken = ">=";
+                        nextToken = ">= ";
                         break;
                     }
                     else if(lexLen == 1) {
-                        nextToken = ">";
+                        nextToken = "> ";
                         break;
                     }
                     else
@@ -228,17 +228,17 @@ public class Translator
                 case '|':
                     checkRelation();
                     if(lexLen == 2) {
-                        nextToken = "||";
+                        nextToken = "|| ";
                         break;
                     }
                     else {
                         if (lexLen == 1)
-                            nextToken = "|";
+                            nextToken = "| ";
                         break;
                     }
                 case ';':
                     addChar();
-                    nextToken = ";";
+                    nextToken = ";\n";
                     break;
                 default:
                     if(Character.isDefined(ch))
@@ -347,23 +347,23 @@ public class Translator
                 result = true;
                 break;
             case "console":
-                nextToken = "System.out.println(";
+                nextToken = "System.out.println";
                 result = true;
                 break;
             case "IF":
-                nextToken = "if";
+                nextToken = "if(";
                 result = true;
                 break;
             case "END_IF":
-                nextToken = "}";
+                nextToken = "}\n";
                 result = true;
                 break;
             case "THEN":
-                nextToken = "{";
+                nextToken = ")\n{\n";
                 result = true;
                 break;
             case "WHILE":
-                nextToken = "while";
+                nextToken = "while(";
                 result = true;
                 break;
 //                case "FUNCTION":
@@ -378,36 +378,36 @@ public class Translator
 //                    nextToken = RETURNS_FUNCTION_COMMAND;
 //                    result = true;
 //                    break;
-//                case "FOR":
-//                    nextToken = FOR_LOOP_ID;
-//                    result = true;
-//                    break;
-//                case "END_FOR":
-//                    nextToken = END_FOR_LOOP_ID;
-//                    result = true;
-//                    break;
-//                case "LOOP":
-//                    nextToken = LOOP_KEYWORD;
-//                    result = true;
-//                    break;
-//                case "END_WHILE":
-//                    nextToken = END_WHILE_ID;
-//                    result = true;
-//                    break;
+                case "FOR":
+                    nextToken = "for(";
+                    result = true;
+                    break;
+                case "END_FOR":
+                    nextToken = "\n}";
+                    result = true;
+                    break;
+                case "LOOP":
+                    nextToken = ")\n{\n";
+                    result = true;
+                    break;
+                case "END_WHILE":
+                    nextToken = "\n}";
+                    result = true;
+                    break;
             case "END_ELSE":
-                nextToken = "}";
+                nextToken = "\n}\n";
                 result = true;
                 break;
             case "ELSE":
-                nextToken = "else";
+                nextToken = "}\nelse\n{\n";
                 result = true;
                 break;
             case "true":
-                nextToken = "true";
+                nextToken = "true ";
                 result = true;
                 break;
             case "false":
-                nextToken = "false";
+                nextToken = "false ";
                 result = true;
                 break;
 //                case "void":
@@ -601,8 +601,10 @@ public class Translator
                 }
                 System.out.println(getLexemeArrayContents());
                 //Checking if identifier with function appended
-                if(!checkCommand())
+                if(!checkCommand()) {
+                    nextToken = getLexemeArrayContents() + " ";
                     System.out.println("not a command");//nextToken = IDENTIFIER_VARIABLE;
+                }
                 //Checking to see if the identifier has a function attachment
                 if(charClass == DECIMAL && decimalCount == 1)
                 {
@@ -646,8 +648,8 @@ public class Translator
                 System.out.println(nextChar);
                 lookup(nextChar);
                 getChar(fis);
-//                if(nextToken == "\\u001a")
-//                    endOfFile = true;
+                if(nextToken == "\\u001a")
+                    endOfFile = true;
                 break;
 
             //If " is found, get the rest of the string literal
