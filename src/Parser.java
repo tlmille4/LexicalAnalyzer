@@ -1,6 +1,6 @@
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Scanner;
+import com.sun.org.apache.bcel.internal.generic.NEW;
+
+import java.util.*;
 
 /**
  * Class: Parser
@@ -18,6 +18,8 @@ public class Parser
     boolean isValid = true;
     int lineCount = 1;
     Deque<Integer> stack = new ArrayDeque<Integer>();
+    HashMap<Integer, String > keywords = new HashMap<>();
+
 
     /**************** KEYWORD DECLARATIONS **************************/
     public final int NEW_LINE = -2;
@@ -91,6 +93,75 @@ public class Parser
     Parser(Scanner in)
     {
         this.in = in;
+        addKeywordsToMap();
+    }
+
+    /**
+     * addKeywordsToMap
+     * This function is called to add keywords to hashmap for cross reference
+     */
+    void addKeywordsToMap()
+    {
+        keywords.put(NEW_LINE, "New Line Character");
+        keywords.put(DECIMAL, "Decimal");
+        keywords.put(LETTER, "Letter");
+        keywords.put(CONSTANT_DECLARATION, "Constant Declaration");
+        keywords.put(DIGIT, "Digit");
+        keywords.put(UNKNOWN, "Unknown");
+        keywords.put(FLOAT_LIT, "Floating Point Number");
+        keywords.put(INT_LIT, "Integer Number");
+        keywords.put(IDENTIFIER_VARIABLE, "Identifier Variable");
+        keywords.put(UNDERSCORE, "Underscore");
+        keywords.put(ASSIGN_OP, "[=] Assignment Operator");
+        keywords.put(ADD_OP, "[+] Addition Operator");
+        keywords.put(SUB_OP, "[-] Subtraction Operator");
+        keywords.put(MULT_OP, "[*] Multiplication Operator");
+        keywords.put(DIV_OP, "[/] Division Operator");
+        keywords.put(LEFT_PAREN, "[(] Left Parenthesis");
+        keywords.put(RIGHT_PAREN, "[)] Right Parenthesis");
+        keywords.put(STRING_LITERAL, "String Literal");
+        keywords.put(SEMICOLON, "[;] Semicolon");
+        keywords.put(START_MAIN, "START_MAIN Keyword");
+        keywords.put(END_MAIN, "END_MAIN Keyword");
+        keywords.put(IF, "IF Keyword");
+        keywords.put(THEN, "THEN Keyword");
+        keywords.put(END_IF, "END_IF Keyword");
+        keywords.put(ELSE_ID, "ELSE Keyword");
+        keywords.put(FOR_LOOP_ID, "FOR Keyword");
+        keywords.put(SEPERATOR, "[|] Separator Symbol");
+        keywords.put(LOOP_KEYWORD, "LOOP Keyword");
+        keywords.put(END_FOR_LOOP_ID, "END_FOR Keyword");
+        keywords.put(WHILE_ID, "While Keyword");
+        keywords.put(END_WHILE_ID, "END_WHILE Keyword");
+        keywords.put(LINE_COMMENT, "[#] Line Comment");
+        keywords.put(MULTI_LINE_COMMENT_BEGIN, "[#*] Multiline Comment Start");
+        keywords.put(MULTI_LINE_COMMENT_END, "[*#] Multiline Comment End");
+        keywords.put(EQUAL_RELATION, "[==] Equal Relation");
+        keywords.put(OR_RELATION, "[||] OR Relation");
+        keywords.put(LESS_RELATION, "[<] Less Relation");
+        keywords.put(GREATER_RELATION, "[>] Greater Relation");
+        keywords.put(LESS_EQUAL_RELATION, "[<=] Less Equal Relation");
+        keywords.put(GREATER_EQUAL_RELATION, "[>=] Greater Equal Relation");
+        keywords.put(TRUE_BOOLEAN, "True Boolean");
+        keywords.put(FALSE_BOOLEAN, "False Boolean");
+        keywords.put(AND_RELATION, "AND Relation");
+        keywords.put(INTEGER_DECLARATION, "Integer Declaration");
+        keywords.put(FLOAT_DECLARATION, "Float Declaration");
+        keywords.put(STRING_DECLARATION, "String Declaration");
+        keywords.put(BOOLEAN_DECLARATION, "Boolean Declaration");
+        keywords.put(CHARACTER_DECLARATION, "Character Declaration");
+        keywords.put(LENGTH_FUNCTION, "Length Function");
+        keywords.put(TOLOWER_FUNCTION, "TO_LOWER Function");
+        keywords.put(TOUPPER_FUNCTION, "TO_UPPER Function");
+        keywords.put(CONSOLE_FUNCTION, "console Function Statement");
+        keywords.put(FUNCTION_DECLARATION, "Function Declaration");
+        keywords.put(COMMA_SEPARATOR, "[,] Comma Separator");
+        keywords.put(RETURNS_FUNCTION_COMMAND, "RETURNS command");
+        keywords.put(VOID_IDENTIFIER_TYPE, "VOID type");
+        keywords.put(FUNCTION_END_STATEMENT, "FUNCTION_END Statement");
+        keywords.put(KEY_INPUT_READ, "key_in Statement");
+        keywords.put(INCREMENT_OPERATOR, "[++] Increment Operator");
+        keywords.put(DECREMENT_OPERATOR, "[--] Decrement Operator");
     }
 
     /**
@@ -700,7 +771,7 @@ public class Parser
      */
     void printError()
         {
-            System.out.println("[!] Syntax Error near: " + currToken + " near line " + lineCount);
+            System.out.println("[!] Syntax Error near: " + "[ " + keywords.get(currToken)+ " ]" + " near line " + lineCount);
         }
 
     /**
