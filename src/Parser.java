@@ -1,26 +1,23 @@
-import java.io.FileOutputStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Scanner;
 
-public class Parser {
+/**
+ * Class: Parser
+ * This class will parse the lexemes from the input file and check the
+ * validity of the syntax of the code
+ */
+public class Parser
+{
+    //Declaring global variables
     Scanner in;
     int currToken = -2;
-    int prevToken = -3;
     int currDeclaration = -1;
     boolean endOfFile = false;
     boolean breakStatementBlock = false;
     boolean isValid = true;
     int lineCount = 1;
-
     Deque<Integer> stack = new ArrayDeque<Integer>();
-
-
-    Parser(Scanner in/*, FileOutputStream outFile*/)
-    {
-        this.in = in;
-        //this.out = outFile;
-    }
 
     /**************** KEYWORD DECLARATIONS **************************/
     public final int NEW_LINE = -2;
@@ -86,38 +83,27 @@ public class Parser {
     final int DECREMENT_OPERATOR = 111;
     /**************** END KEYWORD DECLARATIONS **********************/
 
+    /**
+     * Parser
+     * Parser parameter constructor that is passed input scanner to read infile
+     * @param in - Scanner object used to read lexical analyzer file
+     */
+    Parser(Scanner in)
+    {
+        this.in = in;
+    }
 
-
-//        void parseStatement(int in)
-//        {
-//
-//            //checkTopLevel();
-//
-//            isLoopControlStart(in);
-//
-//
-//
-//        }
-
-        int getNextToken()
+    /**
+     * getNextToken
+     * This function is used to get the next lexeme from the the lex input file.
+     * @return currToken - Integer
+     */
+    int getNextToken()
         {
 
             if(in.hasNextInt())
             {
-
                 currToken = in.nextInt();
-//                System.out.println(currToken);
-//                if(currToken == NEW_LINE)
-//                {
-//                    do
-//                    {
-//                        lineCount++;
-//                        currToken = in.nextInt();
-//                        System.out.println(currToken);
-//                    }
-//                    while (currToken != NEW_LINE);
-//                }
-//                System.out.println(currToken);
                 return currToken;
             }
             else
@@ -127,7 +113,13 @@ public class Parser {
             }
         }
 
-        void checkTopLevel(int in)
+    /**
+     * checkTopLevel
+     * This function is called to check the top level of the parse tree. It check to see if program is
+     * starting or stopping as well as if a function is called
+     * @param in - input lexeme/token integer
+     */
+    void checkTopLevel(int in)
         {
             switch(in)
             {
@@ -236,113 +228,143 @@ public class Parser {
             }
         }
 
-        boolean isValidDeclarationType(int in)
+    /**
+     * isValidDeclarationType
+     * This function checks to see if the declaration type of a variable is correct, and returns true
+     * if it is, false if not
+     * @param in - Integer of Variable type
+     * @return boolean
+     */
+    boolean isValidDeclarationType(int in)
+    {
+        switch(in)
         {
-            switch(in)
-            {
-                case VOID_IDENTIFIER_TYPE:
-                case INTEGER_DECLARATION:
-                case STRING_DECLARATION:
-                case BOOLEAN_DECLARATION:
-                case CHARACTER_DECLARATION:
-                case FLOAT_DECLARATION:
-                    return true;
-                default:
-                    return false;
-            }
+            case VOID_IDENTIFIER_TYPE:
+            case INTEGER_DECLARATION:
+            case STRING_DECLARATION:
+            case BOOLEAN_DECLARATION:
+            case CHARACTER_DECLARATION:
+            case FLOAT_DECLARATION:
+                return true;
+            default:
+                return false;
         }
+    }
 
-        void checkStatementBlock(int in)
+    /**
+     * checkStatementBlock
+     * This function is called every time a new line is detected.
+     * It will see what decision is needed to further parse, and default to an invalid condition state
+     * @param in - Integer of Token
+     */
+    void checkStatementBlock(int in)
+    {
+        switch (in)
         {
-            switch (in)
-            {
-                case MULTI_LINE_COMMENT_BEGIN:
-                    do {
-                       currToken = getNextToken();
-                    } while(currToken != MULTI_LINE_COMMENT_END);
-                    checkStatementBlock(currToken);
-                    break;
-                case MULTI_LINE_COMMENT_END:
-                    checkStatementBlock(getNextToken());
-                    break;
-                case IDENTIFIER_VARIABLE:
-                    currToken = getNextToken();
-                    if(currToken == ASSIGN_OP)
-                    {
-                        checkAssignment(getNextToken());
-                    }
-                    else {
-                        isValid = false;
-                        printError();
-                    }
-                    break;
-                case INTEGER_DECLARATION:
-                    currDeclaration = INTEGER_DECLARATION;
-                    checkDeclaration(getNextToken());
-                    break;
-                case STRING_DECLARATION:
-                    currDeclaration = STRING_DECLARATION;
-                    checkDeclaration(getNextToken());
-                    break;
-                case BOOLEAN_DECLARATION:
-                    currDeclaration = BOOLEAN_DECLARATION;
-                    checkDeclaration(getNextToken());
-                    break;
-                case CHARACTER_DECLARATION:
-                    currDeclaration = CHARACTER_DECLARATION;
-                    checkDeclaration(getNextToken());
-                    break;
-                case CONSTANT_DECLARATION:
-                    checkConstant(getNextToken());
-                    break;
-                case FLOAT_DECLARATION:
-                    currDeclaration = FLOAT_DECLARATION;
-                    checkDeclaration(getNextToken());
-                    break;
-                case CONSOLE_FUNCTION:
-                    checkConsoleFunction(getNextToken());
-                    break;
-                case WHILE_ID:
-                    if(checkCondition(getNextToken()))
-                    {
-                        loopBodyExecution(END_WHILE_ID);
-                    }
-                    else
-                    {
-                        isValid = false;
-                        printError();
-                    }
-                    break;
-                case FOR_LOOP_ID:
-                    checkForLoop();
-                    break;
-                case IF:
-                    checkIfConditional();
-                    break;
-                default:
-                    if(currToken == END_IF || currToken == END_WHILE_ID || currToken == END_FOR_LOOP_ID)
-                    {
-                        breakStatementBlock = true;
-                    }
-                    else if (currToken == FUNCTION_END_STATEMENT)
-                    {
-                        currToken = getNextToken();
-                        if (currToken == IDENTIFIER_VARIABLE)
-                            checkTopLevel(getNextToken());
-                        else
-                            printError();
-                    }
-                    else
-                    {
-                        isValid = false;
-                        System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
+            case MULTI_LINE_COMMENT_BEGIN:
+                do {
+                   currToken = getNextToken();
+                } while(currToken != MULTI_LINE_COMMENT_END);
+                checkStatementBlock(currToken);
+                break;
+            case MULTI_LINE_COMMENT_END:
+                checkStatementBlock(getNextToken());
+                break;
+            case IDENTIFIER_VARIABLE:
+                currToken = getNextToken();
+                if(currToken == ASSIGN_OP)
+                {
+                    checkAssignment(getNextToken());
+                }
+                else {
+                    isValid = false;
+                    printError();
+                }
+                break;
+            case INTEGER_DECLARATION:
+                currDeclaration = INTEGER_DECLARATION;
+                checkDeclaration(getNextToken());
+                break;
+            case STRING_DECLARATION:
+                currDeclaration = STRING_DECLARATION;
+                checkDeclaration(getNextToken());
+                break;
+            case BOOLEAN_DECLARATION:
+                currDeclaration = BOOLEAN_DECLARATION;
+                checkDeclaration(getNextToken());
+                break;
+            case CHARACTER_DECLARATION:
+                currDeclaration = CHARACTER_DECLARATION;
+                checkDeclaration(getNextToken());
+                break;
+            case CONSTANT_DECLARATION:
+                checkConstant(getNextToken());
+                break;
+            case FLOAT_DECLARATION:
+                currDeclaration = FLOAT_DECLARATION;
+                checkDeclaration(getNextToken());
+                break;
+            case CONSOLE_FUNCTION:
+                checkConsoleFunction(getNextToken());
+                break;
+            case WHILE_ID:
+                if(checkCondition(getNextToken()))
+                {
+                    loopBodyExecution(END_WHILE_ID);
+                }
+                else
+                {
+                    isValid = false;
+                    printError();
+                }
+                break;
+            case FOR_LOOP_ID:
+                checkForLoop();
+                break;
+            case IF:
+                checkIfConditional();
+                break;
+            case END_IF:
+            case END_WHILE_ID:
+            case END_FOR_LOOP_ID:
+                breakStatementBlock = true;
+                break;
+            case FUNCTION_END_STATEMENT:
+                currToken = getNextToken();
+                if (currToken == IDENTIFIER_VARIABLE)
+                    checkTopLevel(getNextToken());
+                else
+                    printError();
+                break;
+            default:
+//                    if(currToken == END_IF || currToken == END_WHILE_ID || currToken == END_FOR_LOOP_ID)
+//                    {
+//                        breakStatementBlock = true;
+//                    }
+//                    else if (currToken == FUNCTION_END_STATEMENT)
+//                    {
+//                        currToken = getNextToken();
+//                        if (currToken == IDENTIFIER_VARIABLE)
+//                            checkTopLevel(getNextToken());
+//                        else
+//                            printError();
+//                    }
+//                    else
+//                    {
+                    isValid = false;
+                    System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
 
-                    }
-            }
+//                    }
         }
+    }
 
 
-        void checkForLoop()
+    /**
+     * checkForLoop
+     * This function is called when a for loop is detected
+     * It will further check the syntax to ensure that it is valid
+     */
+    void checkForLoop()
         {
 
             if (checkCondition(getNextToken()))
@@ -351,9 +373,7 @@ public class Parser {
                 {
                     currToken = getNextToken();
                     if (currToken == SEPERATOR)
-                    {
                         isValid = checkCondition(getNextToken());
-                    }
                     else
                     {
                         isValid = false;
@@ -364,12 +384,8 @@ public class Parser {
             else
                 isValid = false;
 
-
-
             if(isValid == true)
-            {
                 loopBodyExecution(END_FOR_LOOP_ID);
-            }
             else
             {
                 isValid = false;
@@ -377,7 +393,13 @@ public class Parser {
             }
         }
 
-        void loopBodyExecution(int loopTypeEndID)
+    /**
+     * loopBodyExecution
+     * This function is called once a loop is detected and the body of the loop is to be executed.
+     * It will check the syntax of the body of the loop
+     * @param loopTypeEndID - Integer that contains the loop type
+     */
+    void loopBodyExecution(int loopTypeEndID)
         {
             currToken = getNextToken();
             if(currToken == LOOP_KEYWORD)
@@ -398,7 +420,11 @@ public class Parser {
             }
         }
 
-        void checkIfConditional()
+    /**
+     * checkIfConditional
+     * This function is called to check the syntax of an If conditional
+     */
+    void checkIfConditional()
         {
             if(checkCondition(getNextToken()))
             {
@@ -423,7 +449,13 @@ public class Parser {
             }
         }
 
-        boolean checkCondition(int in)
+    /**
+     * checkCondition
+     * This function is used to check the validity of a condition
+     * @param in - Integer ID of the current token
+     * @return boolean, true is valid false if condition is invalid
+     */
+    boolean checkCondition(int in)
         {
             switch(in)
             {
@@ -449,10 +481,15 @@ public class Parser {
                     printError();
                     return false;
             }
-
         }
 
-        boolean checkComparator(int in)
+    /**
+     * checkComparator
+     * This condition is used to check whether an inputted comparator id is valid or not
+     * @param in - Integer - comparator ID
+     * @return boolean, true if valid, false if invalid
+     */
+    boolean checkComparator(int in)
         {
             switch(in)
             {
@@ -474,7 +511,12 @@ public class Parser {
             }
         }
 
-        void checkConsoleFunction(int in)
+    /**
+     * checkConsoleFunction
+     * This function is called to check the validity of the syntax of a console statement
+     * @param in - inputted token ID
+     */
+    void checkConsoleFunction(int in)
         {
             if(in == LEFT_PAREN)
             {
@@ -497,7 +539,6 @@ public class Parser {
                     else
                         validSyntax = false;
                 }
-
                 if(currToken == RIGHT_PAREN && validSyntax == true)
                 {
                     currToken = getNextToken();
@@ -508,7 +549,6 @@ public class Parser {
                 }
                 else
                     printError();
-
             }
             else
             {
@@ -517,198 +557,185 @@ public class Parser {
             }
         }
 
-        void checkConstant(int in)
+    /**
+     * checkConstant
+     * This function is called to ensure the validity of syntax of a constant statement
+     * @param in - Integer - token ID
+     */
+    void checkConstant(int in)
+    {
+        switch(in)
         {
-            switch(in)
-            {
-                case FLOAT_DECLARATION:
-                case INTEGER_DECLARATION:
-                case STRING_DECLARATION:
-                case BOOLEAN_DECLARATION:
-                case CHARACTER_DECLARATION:
-                    checkDeclaration(getNextToken());
-                    break;
-                default:
-                    isValid = false;
-                    printError();
-            }
-        }
-        void checkDeclaration(int in)
-        {
-
-            if(in == IDENTIFIER_VARIABLE)
-            {
-                currToken = getNextToken();
-                switch (currToken)
-                {
-                    case SEMICOLON:
-                        checkNewLine();
-                        break;
-                    case ASSIGN_OP:
-                        checkAssignment(getNextToken());
-                        break;
-                    default:
-                        isValid = false;
-                        printError();
-
-                }
-
-            }
-            else {
+            case FLOAT_DECLARATION:
+            case INTEGER_DECLARATION:
+            case STRING_DECLARATION:
+            case BOOLEAN_DECLARATION:
+            case CHARACTER_DECLARATION:
+                checkDeclaration(getNextToken());
+                break;
+            default:
                 isValid = false;
                 printError();
-
-            }
         }
+    }
 
-
-        void checkAssignment(int in)
+    /**
+     * checkDeclaration
+     * This function is called to check the validity of syntax of a declaration statement
+     * @param in - Integer - token ID
+     */
+    void checkDeclaration(int in)
+    {
+        if(in == IDENTIFIER_VARIABLE)
         {
-            switch (in)
+            currToken = getNextToken();
+            switch (currToken)
             {
-                case LEFT_PAREN:
-                    stack.push(in);
-                    checkAssignment(getNextToken());
-                    break;
-                case SUB_OP:
-                    checkAssignment(getNextToken());
-                    break;
-                case INT_LIT:
-                    verifyRightSide(INTEGER_DECLARATION);
-                    break;
-                case FLOAT_LIT:
-                    verifyRightSide(FLOAT_DECLARATION);
-                    break;
-                case STRING_LITERAL:
-                    verifyRightSide(STRING_DECLARATION);
-                    break;
-                case TRUE_BOOLEAN:
-                case FALSE_BOOLEAN:
-                    break;
-                case IDENTIFIER_VARIABLE:
-                    verifyRightSide(IDENTIFIER_VARIABLE);
-                    break;
-                default:
-                    isValid = false;
-                    printError();
-            }
-        }
-
-        void checkOperator(int in)
-        {
-            switch(in)
-            {
-                case ADD_OP:
-                case SUB_OP:
-                case MULT_OP:
-                case DIV_OP:
-                    checkAssignment(getNextToken());
-                    break;
-                default:
-                    isValid = false;
-                    printError();
-                    break;
-            }
-        }
-
-        void verifyRightSide(int inType)
-        {
-            if(currDeclaration == inType || inType == IDENTIFIER_VARIABLE)
-            {
-                currToken = getNextToken();
-                if (currToken == SEMICOLON)
-                {
+                case SEMICOLON:
                     checkNewLine();
-                    currDeclaration = -1;
-                }
-                else
-                    checkOperator(currToken);
+                    break;
+                case ASSIGN_OP:
+                    checkAssignment(getNextToken());
+                    break;
+                default:
+                    isValid = false;
+                    printError();
             }
-            else {
+        }
+        else {
+            isValid = false;
+            printError();
+
+        }
+    }
+
+
+    /**
+     * checkAssignemnt
+     * This function is used to check validity of syntax of an assignment statement
+     * @param in - Integer - token ID
+     */
+    void checkAssignment(int in)
+    {
+        switch (in)
+        {
+            case LEFT_PAREN:
+                stack.push(in);
+                checkAssignment(getNextToken());
+                break;
+            case SUB_OP:
+                checkAssignment(getNextToken());
+                break;
+            case INT_LIT:
+                verifyRightSide(INTEGER_DECLARATION);
+                break;
+            case FLOAT_LIT:
+                verifyRightSide(FLOAT_DECLARATION);
+                break;
+            case STRING_LITERAL:
+                verifyRightSide(STRING_DECLARATION);
+                break;
+            case TRUE_BOOLEAN:
+            case FALSE_BOOLEAN:
+                break;
+            case IDENTIFIER_VARIABLE:
+                verifyRightSide(IDENTIFIER_VARIABLE);
+                break;
+            default:
                 isValid = false;
-
                 printError();
-            }
         }
+    }
 
-        void printError()
+    /**
+     * checkOperator
+     * This function is used to check validity of operator syntax
+     * @param in - Integer - token ID
+     */
+    void checkOperator(int in)
+    {
+        switch(in)
         {
-            System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
+            case ADD_OP:
+            case SUB_OP:
+            case MULT_OP:
+            case DIV_OP:
+                checkAssignment(getNextToken());
+                break;
+            default:
+                isValid = false;
+                printError();
+                break;
         }
+    }
 
-        void checkNewLine()
+    /**
+     * verityRightSide
+     * This function is called to verifty the right side of an assignment statement's syntax
+     * @param inType - Integer, token ID of current declared variable
+     */
+    void verifyRightSide(int inType)
+    {
+        if(currDeclaration == inType || inType == IDENTIFIER_VARIABLE)
         {
-            if(isValid == true)
+            currToken = getNextToken();
+            if (currToken == SEMICOLON)
             {
-                lineCount++;
-                //Making sure to reset boolean to break away from statement block in case of conditional
-                breakStatementBlock = false;
-                currToken = getNextToken();
-
-                if (currToken == END_MAIN) {
-                    checkTopLevel(currToken);
-                } else
-                    checkStatementBlock(currToken);
+                checkNewLine();
+                currDeclaration = -1;
             }
             else
-                printError();
+                checkOperator(currToken);
         }
-
-
-//        void checkCommands(int in)
-//        {
-//
-//            System.out.println(in);
-//            switch(in)
-//            {
-//                case ASSIGN_OP:
-//                    checkCommands(getNextToken());
-//                case IDENTIFIER_VARIABLE:
-//                    checkCommands(getNextToken());
-//                    break;
-//                case INTEGER_DECLARATION:
-//                    checkCommands(getNextToken());
-//                    break;
-//                case STRING_DECLARATION:
-//                    break;
-//                case SEMICOLON:
-//                    System.out.println("end of line");
-//                    lineCount++;
-//                    checkCommands(getNextToken());
-//                    break;
-//                case END_MAIN:
-//                    currToken = getNextToken();
-//                    if(currToken == -1)
-//                    {
-//                        endOfFile = true;
-//                        printResult();
-//                    }
-//                    else
-//                        checkCommands(currToken);
-//                    break;
-//                default:
-//                    isValid = false;
-//                    System.out.println("[!] Syntax Error near: " + currToken + " on line " + lineCount);
-//
-//            }
-//        }
-
-        void printResult()
+        else
         {
-            if(isValid == true)
-                System.out.println("[~] Parser Check Passed\n");
-            else
-                System.out.println("[!] Error: Parser Check Failed\n");
+            isValid = false;
+            printError();
+        }
+    }
 
+    /**
+     * printError
+     * This function is called to print error details on the current syntax
+     */
+    void printError()
+        {
+            System.out.println("[!] Syntax Error near: " + currToken + " near line " + lineCount);
         }
 
-//        boolean isLoopControlStart(int inCommand)
-//        {
-//            if (inCommand == WHILE_ID || inCommand == FOR_LOOP_ID)
-//            {
-//                return true;
-//            }
-//            else
-//                return false;
-//        }
+    /**
+     * checkNewLine
+     * This function is called to check to see if a new line is being started
+     * If so, line count is incremented, variables are reset and further syntax checks occur
+     */
+    void checkNewLine()
+    {
+        if(isValid == true)
+        {
+            lineCount++;
+
+            //Making sure to reset boolean to break away from statement block in case of conditional
+            breakStatementBlock = false;
+            currToken = getNextToken();
+
+            if (currToken == END_MAIN)
+                checkTopLevel(currToken);
+            else
+                checkStatementBlock(currToken);
+        }
+        else
+            printError();
+    }
+
+    /**
+     * printResult
+     * This function is called once the parser is completed. If all syntax is valid, it is printed to screen
+     */
+    void printResult()
+    {
+        if(isValid == true)
+            System.out.println("[~] Parser Check Passed\n");
+        else
+            System.out.println("[!] Error: Parser Check Failed\n");
+    }
 }

@@ -10,7 +10,6 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws IOException
     {
-
         File inputFile;
         FileInputStream fis;
 
@@ -20,10 +19,6 @@ public class Main {
         File lexFile = new File("lex.txt");
         File javaOut = new File("javaout.java");
         LexicalAnalyzer lex = new LexicalAnalyzer(fis, lexFile);
-        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-
-
-        FileWriter fileWriter = new FileWriter(lexFile);
 
         if (!(inputFile.exists()))
             System.out.println("Error opening input file");
@@ -40,22 +35,22 @@ public class Main {
                 lex.lex();
             } while (lex.nextToken != -1 && lex.continueScanning == true && lex.lexLen < 100);
 
+            System.out.println("|||||||||||||||||||||||");
+            System.out.println("||||    PARSER     ||||");
+            System.out.println("|||||||||||||||||||||||");
+            System.out.println("Checking Syntax Validity . . .");
             if(lex.isValid == true)
             {
-                System.out.println("|||||||||||||||||||||||");
-                System.out.println("||||    PARSER     ||||");
-                System.out.println("|||||||||||||||||||||||");
-                System.out.println("Checking Syntax Validity . . .");
                 Scanner in = new Scanner(new File("lex.txt"));
                 Parser parse = new Parser(in);
                 parse.checkTopLevel(parse.getNextToken());
 
+                System.out.println("|||||||||||||||||||||||");
+                System.out.println("||||  TRANSLATOR   ||||");
+                System.out.println("|||||||||||||||||||||||");
+                System.out.println("Translating T_Type file to Java file . . .");
                 if(parse.isValid == true)
                 {
-                    System.out.println("|||||||||||||||||||||||");
-                    System.out.println("||||  TRANSLATOR   ||||");
-                    System.out.println("|||||||||||||||||||||||");
-                    System.out.println("Translating T_Type file to Java file . . .");
                     fis = new FileInputStream(inputFile);
                     Translator translator = new Translator(fis, javaOut);
                     translator.getChar(fis);
@@ -64,12 +59,11 @@ public class Main {
                     } while (translator.nextToken != "-1" && translator.continueScanning == true && translator.lexLen < 100);
                     translator.out.close();
                 }
-
-
+                else
+                    System.out.println("[!] Error. Parsing of T_Type code is invalid. Please check T_Type input file's validity");
             }
-
-
-
+            else
+                System.out.println("[!] Error. Lexical Analysis of T_Type code is invalid. Please check T_Type input file's validity");
         }
     }
 }

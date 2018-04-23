@@ -1,3 +1,4 @@
+#* Test input *#
 START_MAIN
 integer num1 = 5;
 integer num2 = 10;
